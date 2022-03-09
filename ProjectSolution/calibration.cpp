@@ -34,12 +34,12 @@ void calib(std::vector<cv::String>fileNames, int patternSizeX, int patternSizeY,
 		cv::cvtColor(img, gray, cv::COLOR_RGB2GRAY);
 		int flags = cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE + cv::CALIB_CB_FAST_CHECK;
 		bool checkPatterFound = cv::findChessboardCorners(gray, patternSize, q[i], flags);
-		
+
 		if (checkPatterFound) {
 			cv::cornerSubPix(gray, q[i], cv::Size(11, 11), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
 			Q.push_back(worldCoord);
 		}
-		
+
 		cv::drawChessboardCorners(img, patternSize, q[i], checkPatterFound);
 		i++;
 	}
@@ -65,7 +65,7 @@ void calib(std::vector<cv::String>fileNames, int patternSizeX, int patternSizeY,
 	}
 }
 /*
-// Camera calibration main // 
+// Camera calibration main //
 
 #include "calibration.h"
 
@@ -118,5 +118,5 @@ int main(int argc, char* argv[]) {
 	}
 	return 0;
 }
-// Camera calibration main // 
+// Camera calibration main //
 */

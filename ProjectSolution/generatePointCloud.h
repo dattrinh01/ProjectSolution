@@ -9,8 +9,9 @@
 #include <pcl/point_cloud.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 
 #ifndef _generate_point_cloud
 #define _generate_point_cloud
-pcl::PointCloud<pcl::PointXYZ>::Ptr generatePointCloud(cv::Mat depth_img, cv::Mat mask_img, const double depth_intrinsic[4]);
+pcl::PointCloud<pcl::PointXYZ>::Ptr generatePointCloud(cv::Mat depth_img, const double depth_intrinsic[4]);
 #endif

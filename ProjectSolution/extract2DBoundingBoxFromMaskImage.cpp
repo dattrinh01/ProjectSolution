@@ -12,5 +12,5 @@ void get_bounding_box_from_mask_image(cv::Mat mask_img, int& xMin, int& yMin, in
 	xMin = Min_Rect.tl().x;
 	xMax = Min_Rect.br().x;
 	yMin = Min_Rect.tl().y;
-	yMax = Min_Rect.br().y;	
+	yMax = Min_Rect.br().y;
 }

@@ -1,6 +1,6 @@
 #include "generatePointCloud.h"
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr generatePointCloud(cv::Mat depth_img, cv::Mat mask_img, const double depth_intrinsic[4]) {
+pcl::PointCloud<pcl::PointXYZ>::Ptr generatePointCloud(cv::Mat depth_img, const double depth_intrinsic[4]) {
 
 	const double fx = depth_intrinsic[0];
 	const double fy = depth_intrinsic[1];
@@ -8,6 +8,8 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr generatePointCloud(cv::Mat depth_img, cv::Ma
 	const double cy = depth_intrinsic[3];
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
 
 	for (int x = 0; x < depth_img.rows; x++) {
 		for (int y = 0; y < depth_img.cols; y++) {
