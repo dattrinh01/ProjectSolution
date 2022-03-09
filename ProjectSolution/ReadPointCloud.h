@@ -7,9 +7,11 @@
 #include <opencv2/imgcodecs.hpp>
 
 #include <pcl/io/pcd_io.h>
+#include <pcl/io/ply_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/visualization/cloud_viewer.h>
 
+#include "extractPointCloudInBoundingBox.h"
 
 #ifndef _read_point_cloud_bigbird
 #define _read_point_cloud_bigbird

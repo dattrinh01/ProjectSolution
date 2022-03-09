@@ -8,20 +8,17 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr generatePointCloud(cv::Mat depth_img, const 
 	const double cy = depth_intrinsic[3];
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-
 	for (int x = 0; x < depth_img.rows; x++) {
 		for (int y = 0; y < depth_img.cols; y++) {
 			pcl::PointXYZ p;
 
 			double depth_val = depth_img.ptr<ushort>(x)[y];
 			if (depth_val == 0) { continue; }
-
 			p.z = depth_val;
 			p.x = (y - cx) * p.z / fx;
 			p.y = (x - cy) * p.z / fy;
 			cloud->points.push_back(p);
+			
 		}
 	}
 	return cloud;

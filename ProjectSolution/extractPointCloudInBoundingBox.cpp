@@ -14,6 +14,21 @@ std::string createPLYFileNames(std::string path, std::string toErase) {
 	return path;
 }
 
+pcl::PointCloud<pcl::PointXYZ>::Ptr ransacFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud) {
+
+	std::vector<int>inliers;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr final(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::SampleConsensusModelSphere<pcl::PointXYZ>::Ptr model_ransac(new pcl::SampleConsensusModelSphere<pcl::PointXYZ>(cloud));
+	pcl::RandomSampleConsensus<pcl::PointXYZ> ransac(model_ransac);
+	ransac.setDistanceThreshold(0.01);
+	ransac.computeModel();
+	ransac.getInliers(inliers);
+
+	pcl::copyPointCloud(*cloud, inliers, *final);
+	
+	return final;
+}
+
 void cutPointCloud(std::string depth_path, std::string mask_path) {
 
 	std::vector<std::string> depth_fileNames, mask_fileNames;
