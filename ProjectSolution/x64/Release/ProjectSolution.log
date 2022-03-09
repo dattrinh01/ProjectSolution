@@ -1,7 +1,23 @@
-﻿  main.cpp
+﻿  calibration.cpp
+D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\calibration.cpp(15,40): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\calibration.cpp(15,37): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\calibration.cpp(49,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  extractPointCloudInBoundingBox.cpp
+  extract2DBoundingBoxFromMaskImage.cpp
+  main.cpp
+  generatePointCloud.cpp
+  ReadPointCloud.cpp
   Generating code
-  112 of 256 functions (43.8%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    6 functions had inline decision re-evaluated but remain unchanged
+  571 of 571 functions (100.0%) were compiled.
+    97 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  ProjectSolution.vcxproj -> D:\DATA\Research\DrNhuResearch\ProjectSolution\x64\Release\ProjectSolution.exe
+  ProjectSolution.vcxproj -> D:\DATA\Research\ProjectDrNhu\ProjectSolution\x64\Release\ProjectSolution.exe
