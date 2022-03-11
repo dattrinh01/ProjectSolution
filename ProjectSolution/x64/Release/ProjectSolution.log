@@ -1,11 +1,7 @@
 ﻿  main.cpp
-D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\main.cpp(109,13): warning C4101: 'xMaxD': unreferenced local variable
-D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\main.cpp(109,20): warning C4101: 'yMinD': unreferenced local variable
-D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\main.cpp(109,27): warning C4101: 'yMaxD': unreferenced local variable
-D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\main.cpp(109,6): warning C4101: 'xMinD': unreferenced local variable
   Generating code
-  2 of 1007 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+  6 of 1066 functions ( 0.6%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   ProjectSolution.vcxproj -> D:\DATA\Research\ProjectDrNhu\ProjectSolution\x64\Release\ProjectSolution.exe

@@ -100,41 +100,53 @@ void test_ransac() {
 }
 
 void test_scaling_rgb2depth() {
-	cv::Mat depth_img = cv::imread("D:/DATA/Research/demoData/depth/NP2_0.png");
-	cv::Mat rgb_img = cv::imread("D:/DATA/Research/demoData/rgb/NP2_0.jpg");
-	cv::Mat mask_img = cv::imread("D:/DATA/Research/demoData/masks/NP2_0_mask.pbm");
+	/*cv::Mat depth_img = cv::imread("D:/DATA/Research/demoData/quaker_chewy_dipps_peanut_butter_chocolate/depth/NP1_0.png");
+	cv::Mat rgb_img = cv::imread("D:/DATA/Research/demoData/quaker_chewy_dipps_peanut_butter_chocolate/rgb/NP1_0.jpg");
+	cv::Mat mask_img = cv::imread("D:/DATA/Research/demoData/quaker_chewy_dipps_peanut_butter_chocolate/masks/NP1_0_mask.pbm");*/
 
-	// Find bounding box
-	int xMin, xMax, yMin, yMax;
-	int xMinD, xMaxD, yMinD, yMaxD;
+	std::vector<std::string> depth_fileNames, mask_fileNames;
+	std::string depth_path = "D:/DATA/Research/demoData/windex/depth/*.png";
+	std::string mask_path = "D:/DATA/Research/demoData/windex/masks/*.pbm";
+	cv::glob(depth_path, depth_fileNames, false);
+	cv::glob(mask_path, mask_fileNames, false);
 
-	cv::Mat mSource_Gray, mThreshold;
-	cv::cvtColor(mask_img, mSource_Gray, cv::COLOR_BGR2GRAY);
-	cv::threshold(mSource_Gray, mThreshold, 254, 255, cv::THRESH_BINARY_INV);
-	cv::Mat Points;
-	findNonZero(mThreshold, Points);
-	cv::Rect Min_Rect = boundingRect(Points);
+	std::size_t i = 0;
 
-	xMin = Min_Rect.tl().x;
-	xMax = Min_Rect.br().x;
-	yMin = Min_Rect.tl().y;
-	yMax = Min_Rect.br().y;
-	cv::Rect maskBoxes = cv::Rect(xMin, yMin, xMax - xMin, yMax - yMin);
-	/*cv::rectangle(rgb_img, maskBoxes, cv::Scalar(0, 0, 255), 2);
-	cv::imshow("1", rgb_img);*/
+	for (auto const& f : depth_fileNames) {
+		cv::Mat depth_img = cv::imread(depth_fileNames[i]);
+		cv::Mat mask_img = cv::imread(mask_fileNames[i]);
+		int xMin, xMax, yMin, yMax;
 
-	int cWidth = rgb_img.size().width;
-	int cHeight = rgb_img.size().height;
+		cv::Mat mSource_Gray, mThreshold;
+		cv::cvtColor(mask_img, mSource_Gray, cv::COLOR_BGR2GRAY);
+		cv::threshold(mSource_Gray, mThreshold, 254, 255, cv::THRESH_BINARY_INV);
+		cv::Mat Points;
+		findNonZero(mThreshold, Points);
+		cv::Rect Min_Rect = boundingRect(Points);
 
-	int dWidth = depth_img.size().width;
-	int dHeight = depth_img.size().height;
-	Eigen::Vector4d rBox = Eigen::Vector4d((double)maskBoxes.x / (double)cWidth, (double)maskBoxes.y / (double)cHeight, 
-		(double)maskBoxes.width / (double)cWidth, (double)maskBoxes.height / (double)cHeight);
-	cv::Rect rBB = cv::Rect(rBox.x() * dWidth + 10, rBox.y() * dHeight, rBox.z() * dWidth + 10, rBox.w() * dHeight + 10);
+		xMin = Min_Rect.tl().x;
+		xMax = Min_Rect.br().x;
+		yMin = Min_Rect.tl().y;
+		yMax = Min_Rect.br().y;
+		cv::Rect maskBoxes = cv::Rect(xMin, yMin, xMax - xMin, yMax - yMin);
+		/*cv::rectangle(rgb_img, maskBoxes, cv::Scalar(0, 0, 255), 2);
+		cv::imshow("1", rgb_img);*/
 
-	cv::rectangle(depth_img, rBB, cv::Scalar(0, 0, 255), 2);
-	cv::imshow("D", depth_img);
-	cv::waitKey(0);
+		int cWidth = mask_img.size().width;
+		int cHeight = mask_img.size().height;
+
+		int dWidth = depth_img.size().width;
+		int dHeight = depth_img.size().height;
+		Eigen::Vector4d rBox = Eigen::Vector4d((double)maskBoxes.x / (double)cWidth, (double)maskBoxes.y / (double)cHeight,
+			(double)maskBoxes.width / (double)cWidth, (double)maskBoxes.height / (double)cHeight);
+		cv::Rect rBB = cv::Rect(rBox.x() * dWidth + 10, rBox.y() * dHeight, rBox.z() * dWidth + 10, rBox.w() * dHeight + 10);
+
+		cv::rectangle(depth_img, rBB, cv::Scalar(0, 0, 255), 2);
+		cv::imwrite("D:/DATA/Research/demoData/windex/depth_bb/" + std::to_string(i) + ".png", depth_img);
+		std::cout << "D:/DATA/Research/demoData/windex/depth_bb/" + std::to_string(i) + ".png" << std::endl;
+		i++;
+	}
+	
 }
 
 /*
