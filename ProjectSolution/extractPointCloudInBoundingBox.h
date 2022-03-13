@@ -23,11 +23,6 @@
 std::string createPLYFileNames(std::string path, std::string toErase);
 #endif
 
-#ifndef _filter_ransac
-#define _filter_ransac
-pcl::PointCloud<pcl::PointXYZ>::Ptr ransacFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
-#endif
-
 #ifndef _cut_out_pc
 #define _cut_out_pc
 void cutPointCloud(std::string depth_path, std::string mask_path);

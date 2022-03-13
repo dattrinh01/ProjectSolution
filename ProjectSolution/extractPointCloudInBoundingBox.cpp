@@ -14,21 +14,6 @@ std::string createPLYFileNames(std::string path, std::string toErase) {
 	return path;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr ransacFilter(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud) {
-
-	std::vector<int>inliers;
-	pcl::PointCloud<pcl::PointXYZ>::Ptr final(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::SampleConsensusModelSphere<pcl::PointXYZ>::Ptr model_ransac(new pcl::SampleConsensusModelSphere<pcl::PointXYZ>(cloud));
-	pcl::RandomSampleConsensus<pcl::PointXYZ> ransac(model_ransac);
-	ransac.setDistanceThreshold(0.01);
-	ransac.computeModel();
-	ransac.getInliers(inliers);
-
-	pcl::copyPointCloud(*cloud, inliers, *final);
-	
-	return final;
-}
-
 void cutPointCloud(std::string depth_path, std::string mask_path) {
 
 	std::vector<std::string> depth_fileNames, mask_fileNames;
@@ -41,27 +26,33 @@ void cutPointCloud(std::string depth_path, std::string mask_path) {
 	cv::glob(mask_path, mask_fileNames, false);
 	std::size_t i = 0;
 
+	pcl::PointCloud<pcl::PointXYZ> mergeCloud;
+	std::string mergeCloudPath = "D:/DATA/Research/demoData/red_bull/allPointCloud.ply";
+
 	for (auto const& f : depth_fileNames) {
 		// Read depth image using opencv2 and generate point cloud.
 		cv::Mat croppedImg;
 		cv::Mat depth_img = cv::imread(depth_fileNames[i], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
 		cv::Mat mask_img = cv::imread(mask_fileNames[i]);
+
 		cv::resize(mask_img, mask_img, cv::Size(depth_img.cols, depth_img.rows), cv::INTER_LINEAR);
 
 		// Calculate bouding box from mask image and crop image	
-		int xMin, xMax, yMin, yMax;
-		get_bounding_box_from_mask_image(mask_img, xMin, yMin, xMax, yMax);
-		depth_img(cv::Rect(xMin + 10, yMin - 10, xMax + 20 - xMin - 10, yMax + 20 - yMin + 10)).copyTo(croppedImg);
+		double bbX, bbY, bbWidth, bbHeight;
+		get_bounding_box_from_mask_image(mask_img, depth_img, bbX, bbY, bbWidth, bbHeight);
+		std::cout << "x = " << bbX << "; y = " << bbY << "; width = " << bbWidth << "; height = " << bbHeight << std::endl;
+		depth_img(cv::Rect(bbX, bbY, bbWidth, bbHeight)).copyTo(croppedImg);
 
 		switch (depth_fileNames[i][34])
 		{
 		case '1':
 		{
 			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n1);
-			std::string toErase = "D:/DATA/Research/demoData/depth\\";
+			std::string toErase = "D:/DATA/Research/demoData/red_bull/depth\\";
 			std::string output = createPLYFileNames(depth_fileNames[i], toErase);
-			std::string writePath = "D:/DATA/Research/demoData/pointCloud/" + output;
+			std::string writePath = "D:/DATA/Research/demoData/red_bull/pointCloud/" + output;
 			pcl::io::savePLYFileBinary(writePath, *cloud);
+			mergeCloud += *cloud;
 
 			std::cout << output << std::endl;
 			break;
@@ -70,10 +61,11 @@ void cutPointCloud(std::string depth_path, std::string mask_path) {
 		case '2':
 		{
 			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n2);
-			std::string toErase = "D:/DATA/Research/demoData/depth\\";
+			std::string toErase = "D:/DATA/Research/demoData/red_bull/depth\\";
 			std::string output = createPLYFileNames(depth_fileNames[i], toErase);
-			std::string writePath = "D:/DATA/Research/demoData/pointCloud/" + output;
+			std::string writePath = "D:/DATA/Research/demoData/red_bull/pointCloud/" + output;
 			pcl::io::savePLYFileBinary(writePath, *cloud);
+			mergeCloud += *cloud;
 
 			std::cout << output << std::endl;
 			break;
@@ -82,10 +74,11 @@ void cutPointCloud(std::string depth_path, std::string mask_path) {
 		case '3':
 		{
 			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n3);
-			std::string toErase = "D:/DATA/Research/demoData/depth\\";
+			std::string toErase = "D:/DATA/Research/demoData/red_bull/depth\\";
 			std::string output = createPLYFileNames(depth_fileNames[i], toErase);
-			std::string writePath = "D:/DATA/Research/demoData/pointCloud/" + output;
+			std::string writePath = "D:/DATA/Research/demoData/red_bull/pointCloud/" + output;
 			pcl::io::savePLYFileBinary(writePath, *cloud);
+			mergeCloud += *cloud;
 
 			std::cout << output << std::endl;
 			break;
@@ -94,10 +87,11 @@ void cutPointCloud(std::string depth_path, std::string mask_path) {
 		case '4':
 		{
 			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n4);
-			std::string toErase = "D:/DATA/Research/demoData/depth\\";
+			std::string toErase = "D:/DATA/Research/demoData/red_bull/depth\\";
 			std::string output = createPLYFileNames(depth_fileNames[i], toErase);
-			std::string writePath = "D:/DATA/Research/demoData/pointCloud/" + output;
+			std::string writePath = "D:/DATA/Research/demoData/red_bull/pointCloud/" + output;
 			pcl::io::savePLYFileBinary(writePath, *cloud);
+			mergeCloud += *cloud;
 
 			std::cout << output << std::endl;
 			break;
@@ -106,10 +100,11 @@ void cutPointCloud(std::string depth_path, std::string mask_path) {
 		default:
 		{
 			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n5);
-			std::string toErase = "D:/DATA/Research/demoData/depth\\";
+			std::string toErase = "D:/DATA/Research/demoData/red_bull/depth\\";
 			std::string output = createPLYFileNames(depth_fileNames[i], toErase);
-			std::string writePath = "D:/DATA/Research/demoData/pointCloud/" + output;
+			std::string writePath = "D:/DATA/Research/demoData/red_bull/pointCloud/" + output;
 			pcl::io::savePLYFileBinary(writePath, *cloud);
+			mergeCloud += *cloud;
 
 			std::cout << output << std::endl;
 			break;
@@ -122,5 +117,7 @@ void cutPointCloud(std::string depth_path, std::string mask_path) {
 
 		i++;
 	}
+
+	pcl::io::savePLYFileBinary(mergeCloudPath, mergeCloud);
 
 }

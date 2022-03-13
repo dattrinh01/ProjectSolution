@@ -3,7 +3,6 @@
 #include "generatePointCloud.h"
 #include "ReadPointCloud.h"
 
-
 // Test RANSAC
 #include <pcl/io/ply_io.h>
 #include <pcl/io/pcd_io.h>
@@ -19,8 +18,8 @@
 //
 
 void Extract_PointCloud_from_Bounding_Box() {
-	std::string depth_path = "D:/DATA/Research/demoData/depth/*png";
-	std::string mask_path = "D:/DATA/Research/demoData/masks/*pbm";
+	std::string depth_path = "D:/DATA/Research/demoData/red_bull/depth/*.png";
+	std::string mask_path = "D:/DATA/Research/demoData/red_bull/masks/*.pbm";
 	cutPointCloud(depth_path, mask_path);
 }
 
@@ -90,11 +89,11 @@ void test_ransac() {
 	}
 
 
-	pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
+	/*pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
 	viewer.showCloud(ransacFilter(cloud));
 	while (!viewer.wasStopped())
 	{
-	}
+	}*/
 
 
 }
@@ -218,11 +217,11 @@ void testScalingBoundingBoxFromRGBImageToDepthImage()
 */
 
 int main(int argc, char* argv[]) {
-	//Extract_PointCloud_from_Bounding_Box();
+	Extract_PointCloud_from_Bounding_Box();
 	// test_bounding_box_mask_image();
 	//test_ransac();
 	// read_pcd("D:/DATA/Research/demoData/pointCloud/NP1_0.ply");
-	test_scaling_rgb2depth();
+	//test_scaling_rgb2depth();
 	return 0;
 }
 
