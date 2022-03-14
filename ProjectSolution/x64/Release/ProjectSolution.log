@@ -1,18 +1,7 @@
-﻿  calibration.cpp
-D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\calibration.cpp(15,40): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
-          with
-          [
-              _Tp=float
-          ]
-D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\calibration.cpp(15,37): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
-          with
-          [
-              _Tp=float
-          ]
-D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\calibration.cpp(49,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  extractPointCloudInBoundingBox.cpp
-  extract2DBoundingBoxFromMaskImage.cpp
-  main.cpp
-  generatePointCloud.cpp
-  ReadPointCloud.cpp
-D:\DATA\Research\ProjectDrNhu\ProjectSolution\ProjectSolution\ReadPointCloud.cpp(9,19): error C3861: 'ransacFilter': identifier not found
+﻿  main.cpp
+  Generating code
+  159 of 1520 functions (10.5%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    41 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  ProjectSolution.vcxproj -> D:\DATA\Research\ProjectDrNhu\ProjectSolution\x64\Release\ProjectSolution.exe

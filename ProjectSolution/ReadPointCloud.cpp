@@ -6,6 +6,6 @@ void read_pcd(std::string pointCloudPath) {
 	{
 	}
 	pcl::visualization::CloudViewer viewer("Point cloud");
-	viewer.showCloud(ransacFilter(cloud));
+	viewer.showCloud(cloud);
 	while (!viewer.wasStopped()) {}
 }

@@ -11,10 +11,11 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/radius_outlier_removal.h>
 // Test RANSAC
-
-// Test convert
-#include <opencv2/opencv.hpp>
 #include <Eigen/Dense>
+//
+
+// Test transforms point cloud
+#include <pcl/common/transforms.h>
 //
 
 void Extract_PointCloud_from_Bounding_Box() {
@@ -216,12 +217,39 @@ void testScalingBoundingBoxFromRGBImageToDepthImage()
 }
 */
 
+void test_transform_point_cloud() {
+
+	std::string pathPointCloud = "D:/DATA/Research/demoData/red_bull/NP1_0.ply";
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudTransformed(new pcl::PointCloud<pcl::PointXYZ>);
+
+	pcl::io::loadPLYFile(pathPointCloud, *cloud);
+	Eigen::Matrix4f transformation = Eigen::Matrix4f::Identity();
+	float theta = 90.0f * (M_PI / 180.0f);
+	transformation(0, 0) = cos(theta);
+	transformation(0, 1) = -sin(theta);
+	transformation(1, 0) = sin(theta);
+	transformation(1, 1) = cos(theta);
+
+	transformation(0, 3) = 1.0f;
+
+	pcl::transformPointCloud(*cloud, *cloudTransformed, transformation);
+	pcl::visualization::CloudViewer viewer("cloud");
+	viewer.showCloud(cloudTransformed);
+	while (!viewer.wasStopped()) {
+
+	}
+	pcl::io::savePLYFileBinary("D:/DATA/Research/demoData/red_bull/raw_pc.ply", *cloudTransformed);
+
+}
+
 int main(int argc, char* argv[]) {
-	Extract_PointCloud_from_Bounding_Box();
+	//Extract_PointCloud_from_Bounding_Box();
 	// test_bounding_box_mask_image();
 	//test_ransac();
 	// read_pcd("D:/DATA/Research/demoData/pointCloud/NP1_0.ply");
 	//test_scaling_rgb2depth();
+	test_transform_point_cloud();
 	return 0;
 }
 
