@@ -10,10 +10,7 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/radius_outlier_removal.h>
-// Test RANSAC
-#include <Eigen/Dense>
 //
-
 // Test transforms point cloud
 #include <pcl/common/transforms.h>
 //
@@ -243,14 +240,49 @@ void test_transform_point_cloud() {
 
 }
 
-int main(int argc, char* argv[]) {
+void test_pose_camera_estimation() {
+
+	cv::Mat gray = cv::imread("C:/Users/trinhtandat/Pictures/Camera Roll/1.jpg", cv::IMREAD_GRAYSCALE);
+
+	std::vector<cv::Point3f> worldCoord;
+	cv::Mat imgPoints;
+
+	float vec_camera_matrix[] = { 572.97665944 , 0, 310.95680422, 0, 572.96466485, 215.36230807, 0,0,1 };
+	cv::Mat camera_matrix(3, 3, CV_32F, vec_camera_matrix);
+	float distorsion_n5[] = {-0.08156268 ,0.25217896,  0.00333535,  0.00045479,  0.41249839};
+	cv::Mat camera_distorsion = cv::Mat(1, 5, CV_32F, distorsion_n5);
+
+	int patternSizeX = 10;
+	int patternSizeY = 7;
+
+	cv::Size originChessboard(patternSizeX, patternSizeY);
+	cv::Size patternSize(patternSizeX - 1, patternSizeY - 1);
+
+	cv::Mat rvec(3, 1, CV_32F), tvec(3, 1, CV_32F);
+	std::vector<cv::Point2f>corners; 
+	int flags = cv::CALIB_CB_FAST_CHECK;
+	bool checkChessboard = cv::findChessboardCorners(gray, originChessboard, corners, flags);
+	if (checkChessboard) {
+		for (int i = 1; i < originChessboard.height; i++) {
+			for (int j = 1; j < originChessboard.width; j++) {
+				worldCoord.push_back(cv::Point3f(double(j), float(i), 0));
+			}
+		}
+		cv::solvePnP(worldCoord, corners, camera_matrix, camera_distorsion, rvec, tvec);
+	}
+	//std::cout << rvec;
+}
+
+/*int main(int argc, char* argv[]) {
 	//Extract_PointCloud_from_Bounding_Box();
 	// test_bounding_box_mask_image();
-	//test_ransac();
+	// test_ransac();
 	// read_pcd("D:/DATA/Research/demoData/pointCloud/NP1_0.ply");
 	//test_scaling_rgb2depth();
-	test_transform_point_cloud();
+	// test_transform_point_cloud();
+
+	test_pose_camera_estimation();
 	return 0;
-}
+}*/
 
 

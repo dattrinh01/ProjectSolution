@@ -142,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\DOWNLOAD\camera_calibration.cpp" />
     <ClCompile Include="calibration.cpp" />
     <ClCompile Include="extractPointCloudInBoundingBox.cpp" />
     <ClCompile Include="extract2DBoundingBoxFromMaskImage.cpp" />
@@ -155,6 +156,10 @@
     <ClInclude Include="extract2DBoundingBoxFromMaskImage.h" />
     <ClInclude Include="generatePointCloud.h" />
     <ClInclude Include="ReadPointCloud.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="in_VID5.xml" />
+    <Xml Include="VID5.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

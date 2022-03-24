@@ -25,6 +25,9 @@
     <Filter Include="Source Files\generatePointCloud">
       <UniqueIdentifier>{247c2950-922a-448d-b39a-b2c5fa495b4f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\AnotherCameraCalibration">
+      <UniqueIdentifier>{112059bf-82fd-49e0-9421-56b1d5ed2355}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="calibration.cpp">
@@ -43,6 +46,9 @@
     <ClCompile Include="generatePointCloud.cpp">
       <Filter>Source Files\generatePointCloud</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\DOWNLOAD\camera_calibration.cpp">
+      <Filter>Source Files\AnotherCameraCalibration</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ReadPointCloud.h">
@@ -60,5 +66,13 @@
     <ClInclude Include="generatePointCloud.h">
       <Filter>Source Files\generatePointCloud</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="VID5.xml">
+      <Filter>Source Files\AnotherCameraCalibration</Filter>
+    </Xml>
+    <Xml Include="in_VID5.xml">
+      <Filter>Source Files\AnotherCameraCalibration</Filter>
+    </Xml>
   </ItemGroup>
 </Project>
