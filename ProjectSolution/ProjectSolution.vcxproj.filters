@@ -28,6 +28,9 @@
     <Filter Include="Source Files\AnotherCameraCalibration">
       <UniqueIdentifier>{112059bf-82fd-49e0-9421-56b1d5ed2355}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\AnotherGeneratePointCloud">
+      <UniqueIdentifier>{e30c78f4-fde7-4778-8d78-66ece5fd318c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="calibration.cpp">
@@ -49,6 +52,9 @@
     <ClCompile Include="camera_calibration_sample.cpp">
       <Filter>Source Files\AnotherCameraCalibration</Filter>
     </ClCompile>
+    <ClCompile Include="test_genPCMethod.cpp">
+      <Filter>Source Files\AnotherGeneratePointCloud</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ReadPointCloud.h">
@@ -65,6 +71,9 @@
     </ClInclude>
     <ClInclude Include="generatePointCloud.h">
       <Filter>Source Files\generatePointCloud</Filter>
+    </ClInclude>
+    <ClInclude Include="test_genPCMethod.h">
+      <Filter>Source Files\AnotherGeneratePointCloud</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

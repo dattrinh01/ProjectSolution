@@ -149,6 +149,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="generatePointCloud.cpp" />
     <ClCompile Include="ReadPointCloud.cpp" />
+    <ClCompile Include="test_genPCMethod.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="calibration.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="extract2DBoundingBoxFromMaskImage.h" />
     <ClInclude Include="generatePointCloud.h" />
     <ClInclude Include="ReadPointCloud.h" />
+    <ClInclude Include="test_genPCMethod.h" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="in_VID5.xml" />
