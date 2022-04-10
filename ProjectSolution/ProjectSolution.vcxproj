@@ -142,8 +142,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\DOWNLOAD\camera_calibration.cpp" />
     <ClCompile Include="calibration.cpp" />
+    <ClCompile Include="camera_calibration_sample.cpp" />
     <ClCompile Include="extractPointCloudInBoundingBox.cpp" />
     <ClCompile Include="extract2DBoundingBoxFromMaskImage.cpp" />
     <ClCompile Include="main.cpp" />

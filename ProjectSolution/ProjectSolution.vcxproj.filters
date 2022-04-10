@@ -46,7 +46,7 @@
     <ClCompile Include="generatePointCloud.cpp">
       <Filter>Source Files\generatePointCloud</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\DOWNLOAD\camera_calibration.cpp">
+    <ClCompile Include="camera_calibration_sample.cpp">
       <Filter>Source Files\AnotherCameraCalibration</Filter>
     </ClCompile>
   </ItemGroup>
