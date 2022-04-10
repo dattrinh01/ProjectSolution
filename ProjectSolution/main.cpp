@@ -240,40 +240,152 @@ void test_transform_point_cloud() {
 
 }
 
-void test_pose_camera_estimation() {
+void test_camera_calib(std::vector<std::vector<cv::Point3f> >&objpoints, std::vector<std::vector<cv::Point2f> >&imgpoints)
+{
+	std::vector<cv::Point3f> objp;
+	int CHECKERBOARD[2]{ 9,8 };
 
-	cv::Mat gray = cv::imread("C:/Users/trinhtandat/Pictures/Camera Roll/1.jpg", cv::IMREAD_GRAYSCALE);
-
-	std::vector<cv::Point3f> worldCoord;
-	cv::Mat imgPoints;
-
-	float vec_camera_matrix[] = { 572.97665944 , 0, 310.95680422, 0, 572.96466485, 215.36230807, 0,0,1 };
-	cv::Mat camera_matrix(3, 3, CV_32F, vec_camera_matrix);
-	float distorsion_n5[] = {-0.08156268 ,0.25217896,  0.00333535,  0.00045479,  0.41249839};
-	cv::Mat camera_distorsion = cv::Mat(1, 5, CV_32F, distorsion_n5);
-
-	int patternSizeX = 10;
-	int patternSizeY = 7;
-
-	cv::Size originChessboard(patternSizeX, patternSizeY);
-	cv::Size patternSize(patternSizeX - 1, patternSizeY - 1);
-
-	cv::Mat rvec(3, 1, CV_32F), tvec(3, 1, CV_32F);
-	std::vector<cv::Point2f>corners; 
-	int flags = cv::CALIB_CB_FAST_CHECK;
-	bool checkChessboard = cv::findChessboardCorners(gray, originChessboard, corners, flags);
-	if (checkChessboard) {
-		for (int i = 1; i < originChessboard.height; i++) {
-			for (int j = 1; j < originChessboard.width; j++) {
-				worldCoord.push_back(cv::Point3f(double(j), float(i), 0));
-			}
-		}
-		cv::solvePnP(worldCoord, corners, camera_matrix, camera_distorsion, rvec, tvec);
+	for (int i{ 0 }; i < CHECKERBOARD[1]; i++)
+	{
+		for (int j{ 0 }; j < CHECKERBOARD[0]; j++)
+			objp.push_back(cv::Point3f(j, i, 0));
 	}
-	//std::cout << rvec;
+
+	std::vector<cv::String> images;
+	std::string path = "D:/DATA/Research/DrNhu/demoData/chessboard/*.jpg";
+	cv::glob(path, images);
+	cv::Mat frame, gray;
+	std::vector<cv::Point2f> corner_pts;
+
+	for (int i{ 0 }; i < images.size(); i++)
+	{
+		frame = cv::imread(images[i]);
+		cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
+		std::cout << i << std::endl;
+
+		if (gray.cols > 1200) {
+			cv::Mat gray_temp;
+			cv::GaussianBlur(gray, gray_temp, cv::Size(0,0), 105);
+			cv::addWeighted(gray, 1.8, gray_temp, -0.8, 0, gray);
+		}
+
+		int flag_find_chessboard = cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_FAST_CHECK + cv::CALIB_CB_NORMALIZE_IMAGE + cv::CALIB_CB_FILTER_QUADS;
+
+		bool success = cv::findChessboardCorners(gray, cv::Size(CHECKERBOARD[0], CHECKERBOARD[1]), corner_pts, flag_find_chessboard);
+		if (success == 1)
+		{
+			cv::TermCriteria criteria(cv::TermCriteria::EPS | cv::TermCriteria::MAX_ITER, 30, 0.001);
+			cv::cornerSubPix(gray, corner_pts, cv::Size(11, 11), cv::Size(-1, -1), criteria);
+
+			objpoints.push_back(objp);
+			imgpoints.push_back(corner_pts);
+
+			//std::cout << objp << std::endl;
+
+			//cv::drawChessboardCorners(frame, cv::Size(CHECKERBOARD[0], CHECKERBOARD[1]), corner_pts, success);
+
+		}
+		/*cv::imshow("Find chessboard", frame);
+		cv::waitKey(1);*/
+	}
+
+	cv::Mat R, T;
+	cv::Mat cameraMatrix;
+	cv::Mat distCoeffs;
+	cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.rows, gray.cols), cameraMatrix, distCoeffs, R, T);
+
+	std::cout << "cameraMatrix : " << cameraMatrix << std::endl;
+	std::cout << "distCoeffs : " << distCoeffs << std::endl;
+	std::cout << "Rotation vector : " << R << std::endl;
+	std::cout << "Translation vector : " << T << std::endl;
+	std::cout << "--------------" << std::endl;
+
+	
 }
 
-/*int main(int argc, char* argv[]) {
+void drawAxes(cv::Mat& src_, cv::Mat& dst_,
+	std::vector<cv::Point2d>& imgPts_,
+	std::vector<cv::Point2f>& cornersSP_) {
+	src_.copyTo(dst_);
+	cv::arrowedLine(dst_, cornersSP_[0], imgPts_[0], cv::Scalar(0, 0, 255), 2,
+		cv::LINE_AA, 0);
+	cv::arrowedLine(dst_, cornersSP_[0], imgPts_[1], cv::Scalar(0, 255, 0), 2,
+		cv::LINE_AA, 0);
+	cv::arrowedLine(dst_, cornersSP_[0], imgPts_[2], cv::Scalar(255, 0, 0), 2,
+		cv::LINE_AA, 0);
+}
+
+void test_pose_estimation() {
+
+	cv::Size patternSize_cvS(12, 8);
+	cv::Mat cameraMatrix_Mat = (cv::Mat_<float>(3, 3) << 
+		1.0272067707356030e+03, 0., 6.3950000000000000e+02, 0.,
+		1.0272067707356030e+03, 3.5950000000000000e+02, 0., 0.,1.);
+	std::vector<double> distCoeffs_vecDbt = { -4.1975909041818131e-02, 6.1113602868631364e-02, 0., 0., -1.8944263773968928e-01 };
+
+	cv::Mat frame_Mat, outputFrame_Mat, rvec_Mat, tvec_Mat, gray_Mat;
+	std::vector<cv::Point2f> corners_vecP2f;
+	std::vector<cv::Point2d> imgPts_vecP2d;
+	std::vector<cv::Point3d> boardPts_vecP3d;
+	std::vector<cv::Point3d> axis_vecP3d;
+
+	for (int i{ 0 }; i < patternSize_cvS.height; i++)
+	{
+		for (int j{ 0 }; j < patternSize_cvS.width; j++)
+		{
+			boardPts_vecP3d.push_back(
+				cv::Point3f(i, j, 0)
+			);
+		}
+	}
+
+	axis_vecP3d.push_back(
+		cv::Point3d(3.0, 0.0, 0.0)
+	);
+
+	axis_vecP3d.push_back(
+		cv::Point3d(0.0, 3.0, 0.0)
+	);
+
+	axis_vecP3d.push_back(
+		cv::Point3d(0.0, 0.0, -3.0)
+	);
+
+	cv::Mat rotMat;
+
+	std::vector<cv::String> images;
+	std::string path = "D:/DATA/Research/DrNhu/demoData/chessboard/*.jpg";
+	cv::glob(path, images);
+
+	for (unsigned int i{ 0 }; i < images.size(); i++)
+	{
+		frame_Mat = cv::imread(images[i]);
+		
+		cv::cvtColor(frame_Mat, gray_Mat, cv::COLOR_BGR2GRAY);
+		cv::findChessboardCorners(gray_Mat, patternSize_cvS, corners_vecP2f, cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
+		cv::TermCriteria termCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.001);
+		cv::cornerSubPix(gray_Mat, corners_vecP2f, cv::Size(11, 11), cv::Size(-1, -1), termCriteria);
+		cv::solvePnPRansac(boardPts_vecP3d, corners_vecP2f, cameraMatrix_Mat, distCoeffs_vecDbt, rvec_Mat, tvec_Mat, false, 100, 8.0, 0.99, cv::noArray(), cv::SOLVEPNP_EPNP);
+
+		cv::projectPoints(axis_vecP3d, rvec_Mat, tvec_Mat, cameraMatrix_Mat, distCoeffs_vecDbt, imgPts_vecP2d, cv::noArray(), 0.0);
+		std::cout << std::string(images[i]) << std::endl;
+		drawAxes(frame_Mat, outputFrame_Mat, imgPts_vecP2d, corners_vecP2f);
+		cv::Rodrigues(rvec_Mat, rotMat);
+
+		/*cv::imshow("poseOP", outputFrame_Mat);
+		cv::waitKey(0);*/
+
+
+
+		/*cv::Mat rotMat(3, 3, CV_64F), rotTransMat(3, 4, CV_64F);
+		cv::Rodrigues(rvec_Mat, rotMat);
+		cv::hconcat(rotMat, tvec_Mat, rotTransMat);
+		std::cout << cameraMatrix_Mat * rotTransMat;*/
+	}
+}
+
+
+int main(int argc, char* argv[]) {
 	//Extract_PointCloud_from_Bounding_Box();
 	// test_bounding_box_mask_image();
 	// test_ransac();
@@ -281,8 +393,41 @@ void test_pose_camera_estimation() {
 	//test_scaling_rgb2depth();
 	// test_transform_point_cloud();
 
-	test_pose_camera_estimation();
+	/*cv::Mat rotMat;
+
+	cv::Mat cameraMatrix_Mat = (cv::Mat_<float>(3, 3) <<
+		1.07698399e+03, 0., 6.32802558e+02, 
+		0., 1.07698137e+03, 4.86992442e+02, 
+		0., 0., 1.);
+	cv::Mat tvec_Mat = (cv::Mat_<float>(3, 1) <<
+		-6.60162824e-02, -1.75282704e-01, 7.54902240e-01
+		);
+	cv::Mat rvec_Mat = (cv::Mat_<float>(3, 1) <<
+		-3.51487941e-02, 8.23152514e-04, 9.62536640e-01
+		);
+
+	cv::Mat I = cv::Mat::eye(cv::Size(3, 3), CV_32F);
+	cv::Rodrigues(rvec_Mat, rotMat);
+	cv::Mat minus_tvecs = -1 * tvec_Mat;
+
+	std::vector<cv::Mat> IC_vec = { rotMat, minus_tvecs };
+	cv::Mat IC_Mat;
+	cv::hconcat(IC_vec, IC_Mat);
+	std::cout << cameraMatrix_Mat * IC_Mat << std::endl;*/
+	//test_pose_estimation();
+
+	/*std::vector<std::vector<cv::Point3f> > objpoints;
+	std::vector<std::vector<cv::Point2f> > imgpoints;
+	test_camera_calib(objpoints, imgpoints);*/
+
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr merge_point_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	std::string depth_path = "D:/DATA/Research/DrNhu/demoData/red_bull/depth/*.png";
+	std::string mask_path = "D:/DATA/Research/DrNhu/demoData/red_bull/masks/*.pbm";
+
+	cutPointCloud(depth_path, mask_path);
+
 	return 0;
-}*/
+}
 
 

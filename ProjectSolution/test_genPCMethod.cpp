@@ -1,4 +1,5 @@
-#include "extractPointCloudInBoundingBox.h"
+#include "test_genPCMethod.h"
+
 
 std::string createPLYFileNames(std::string path, std::string toErase) {
 	std::size_t pos = path.find(toErase);
@@ -14,20 +15,50 @@ std::string createPLYFileNames(std::string path, std::string toErase) {
 	return path;
 }
 
-void cutPointCloud(std::string depth_path, std::string mask_path) {
-
+void test_generate_new_point_cloud_method(std::string depth_path, std::string mask_path) {
 	std::vector<std::string> depth_fileNames, mask_fileNames;
 	const double intrinsic_n1[4] = { 571.15928878, 571.16352329, 311.07448762, 233.73421022 };
 	const double intrinsic_n2[4] = { 572.19350868, 572.19147096, 311.08874623, 228.22643626 };
 	const double intrinsic_n3[4] = { 569.22935734, 569.22937915, 308.72611105, 225.53660806 };
 	const double intrinsic_n4[4] = { 567.62010676, 567.62984091, 311.41553264, 225.10048896 };
 	const double intrinsic_n5[4] = { 572.97665944, 572.96466485, 310.95680422, 215.36230807 };
+
+	const double rvec_1[3] = { 1.12134992, 1.38173224, -1.33534398 };
+	const double rvec_2[3] = { 1.35616344, 2.10595134, -1.42210062 };
+	const double rvec_3[3] = { 1.56657549, 1.70420951, -0.85745274 };
+	const double rvec_4[3] = { 1.61963543, 1.33318051, -0.40598225 };
+	const double rvec_5[3] = { 1.61106379, 1.06166743, -0.11593372 };
+	const double rvec_6[3] = { 1.62660842, 1.28622777, -0.36563719 };
+	const double rvec_7[3] = { 1.58353979, 1.60199123, -0.73663599 };
+	const double rvec_8[3] = { 1.45545087, 1.96536236, -1.21193346 };
+	const double rvec_9[3] = { 1.62285857, 1.37495105, -0.47484482 };
+	const double rvec_10[3] = { 1.45590784, 1.95503687, -1.20259261 };
+	const double rvec_11[3] = { 1.56728623, 1.69647319, -0.84700537 };
+	const double rvec_12[3] = { 1.40849942, 2.04377181, -1.32444713 };
+	const double rvec_13[3] = { 1.22845501, 2.25730994, -1.67111105 };
+	const double rvec_14[3] = { 1.62762142, 1.19325915, -0.26631408 };
+	const double rvec_15[3] = { 1.60673483, 0.9429037, -0.00874077 };
+
+
+
+	const double rvec_16[3] = { 1.12134992, 1.38173224, -1.33534398 };
+	const double rvec_17[3] = { 1.12134992, 1.38173224, -1.33534398 };
+	const double rvec_18[3] = { 1.12134992, 1.38173224, -1.33534398 };
+	const double rvec_19[3] = { 1.12134992, 1.38173224, -1.33534398 };
+	const double rvec_20[3] = { 1.12134992, 1.38173224, -1.33534398 };
+	const double rvec_21[3] = { 1.12134992, 1.38173224, -1.33534398 };
+	const double rvec_22[3] = { 1.12134992, 1.38173224, -1.33534398 };
+	const double rvec_23[3] = { 1.12134992, 1.38173224, -1.33534398 };
+	const double rvec_24[3] = { 1.12134992, 1.38173224, -1.33534398 };
+	const double rvec_25[3] = { 1.12134992, 1.38173224, -1.33534398 };
+
+
 	cv::glob(depth_path, depth_fileNames, false);
 	cv::glob(mask_path, mask_fileNames, false);
 	std::size_t i = 0;
 
 	pcl::PointCloud<pcl::PointXYZ> mergeCloud;
-	std::string mergeCloudPath = "D:/DATA/Research/DrNhu/demoData/red_bull/allPointCloud.ply";
+	std::string mergeCloudPath = "D:/DATA/Research/DrNhu/demoData/red_bull/test_new_method_pc.ply";
 
 	for (auto const& f : depth_fileNames) {
 		// Read depth image using opencv2 and generate point cloud.
@@ -119,5 +150,4 @@ void cutPointCloud(std::string depth_path, std::string mask_path) {
 	}
 
 	pcl::io::savePLYFileBinary(mergeCloudPath, mergeCloud);
-
 }

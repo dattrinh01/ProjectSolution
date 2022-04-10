@@ -1,21 +1,18 @@
 <?xml version="1.0"?>
 <opencv_storage>
 	<images>
-		D:/DATA/Research/ProjectDrNhu/chessboard/1.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/2.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/3.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/4.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/5.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/6.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/7.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/8.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/9.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/10.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/11.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/12.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/13.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/14.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/15.jpg
-		D:/DATA/Research/ProjectDrNhu/chessboard/16.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/1.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/3.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/4.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/5.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/6.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/7.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/8.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/10.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/11.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/12.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/13.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/14.jpg
+		D:/DATA/Research/DrNhu/demoData/chessboard/14.jpg
 	</images>
 </opencv_storage>
