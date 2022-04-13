@@ -1,6 +1,8 @@
 #include <iostream>
 #include <math.h>
 #include <string.h>
+#include <fstream>
+#include <sstream>
 
 #include <Eigen/Dense>
 
@@ -24,4 +26,9 @@ std::string createPLYFileNames(std::string path, std::string toErase);
 #ifndef _test_gen_point_cloud_method
 #define _test_gen_point_cloud_method
 void test_generate_new_point_cloud_method(std::string depth_path, std::string mask_path);
+#endif
+
+#ifndef _read_csv
+#define _read_csv
+void read_csv_file(std::string csv_path);
 #endif

@@ -151,3 +151,7 @@ void test_generate_new_point_cloud_method(std::string depth_path, std::string ma
 
 	pcl::io::savePLYFileBinary(mergeCloudPath, mergeCloud);
 }
+
+void read_csv_file(std::string csv_path) {
+
+}
