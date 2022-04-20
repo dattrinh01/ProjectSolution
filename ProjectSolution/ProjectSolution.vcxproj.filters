@@ -19,9 +19,6 @@
     <Filter Include="Source Files\ReadPointCloudBigBIRD">
       <UniqueIdentifier>{66319cd6-75c5-4be4-b296-7323efe53fb6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\convert2DBoundingBoxTo3DBoundingBox">
-      <UniqueIdentifier>{6a173100-d176-47b2-aa81-ca34e54f7875}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\generatePointCloud">
       <UniqueIdentifier>{247c2950-922a-448d-b39a-b2c5fa495b4f}</UniqueIdentifier>
     </Filter>
@@ -30,6 +27,9 @@
     </Filter>
     <Filter Include="Source Files\AnotherGeneratePointCloud">
       <UniqueIdentifier>{e30c78f4-fde7-4778-8d78-66ece5fd318c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extractPointCloudFromBoundingBox">
+      <UniqueIdentifier>{6a173100-d176-47b2-aa81-ca34e54f7875}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -41,10 +41,10 @@
       <Filter>Source Files\ReadPointCloudBigBIRD</Filter>
     </ClCompile>
     <ClCompile Include="extract2DBoundingBoxFromMaskImage.cpp">
-      <Filter>Source Files\convert2DBoundingBoxTo3DBoundingBox</Filter>
+      <Filter>Source Files\extractPointCloudFromBoundingBox</Filter>
     </ClCompile>
     <ClCompile Include="extractPointCloudInBoundingBox.cpp">
-      <Filter>Source Files\convert2DBoundingBoxTo3DBoundingBox</Filter>
+      <Filter>Source Files\extractPointCloudFromBoundingBox</Filter>
     </ClCompile>
     <ClCompile Include="generatePointCloud.cpp">
       <Filter>Source Files\generatePointCloud</Filter>
@@ -61,10 +61,10 @@
       <Filter>Source Files\ReadPointCloudBigBIRD</Filter>
     </ClInclude>
     <ClInclude Include="extract2DBoundingBoxFromMaskImage.h">
-      <Filter>Source Files\convert2DBoundingBoxTo3DBoundingBox</Filter>
+      <Filter>Source Files\extractPointCloudFromBoundingBox</Filter>
     </ClInclude>
     <ClInclude Include="extractPointCloudInBoundingBox.h">
-      <Filter>Source Files\convert2DBoundingBoxTo3DBoundingBox</Filter>
+      <Filter>Source Files\extractPointCloudFromBoundingBox</Filter>
     </ClInclude>
     <ClInclude Include="calibration.h">
       <Filter>Source Files\CameraCalibration</Filter>

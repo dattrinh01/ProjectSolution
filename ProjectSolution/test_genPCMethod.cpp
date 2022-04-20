@@ -1,157 +1,266 @@
 #include "test_genPCMethod.h"
 
+Eigen::MatrixXf readCSV(std::string file, int rows, int cols) {
 
-std::string createPLYFileNames(std::string path, std::string toErase) {
-	std::size_t pos = path.find(toErase);
-	if (pos != std::string::npos)
-	{
-		path.erase(pos, toErase.length());
-	}
-	path.erase(std::prev(path.end()));
-	path.erase(std::prev(path.end()));
-	path.erase(std::prev(path.end()));
-	path.erase(std::prev(path.end()));
-	path += ".ply";
-	return path;
+    std::ifstream in(file);
+
+    std::string line;
+
+    int row = 0;
+    int col = 0;
+
+    Eigen::MatrixXf res = Eigen::MatrixXf(rows, cols);
+
+    if (in.is_open()) {
+
+        while (std::getline(in, line)) {
+
+            char* ptr = (char*)line.c_str();
+            int len = line.length();
+
+            col = 0;
+
+            char* start = ptr;
+            for (int i = 0; i < len; i++) {
+
+                if (ptr[i] == ',') {
+                    res(row, col++) = atof(start);
+                    start = ptr + i + 1;
+                }
+            }
+            res(row, col) = atof(start);
+
+            row++;
+        }
+
+        in.close();
+    }
+    return res;
 }
 
-void test_generate_new_point_cloud_method(std::string depth_path, std::string mask_path) {
-	std::vector<std::string> depth_fileNames, mask_fileNames;
-	const double intrinsic_n1[4] = { 571.15928878, 571.16352329, 311.07448762, 233.73421022 };
-	const double intrinsic_n2[4] = { 572.19350868, 572.19147096, 311.08874623, 228.22643626 };
-	const double intrinsic_n3[4] = { 569.22935734, 569.22937915, 308.72611105, 225.53660806 };
-	const double intrinsic_n4[4] = { 567.62010676, 567.62984091, 311.41553264, 225.10048896 };
-	const double intrinsic_n5[4] = { 572.97665944, 572.96466485, 310.95680422, 215.36230807 };
+bool compareNat(const std::string& a, const std::string& b)
+{
+    if (a.empty())
+        return true;
+    if (b.empty())
+        return false;
+    if (std::isdigit(a[0]) && !std::isdigit(b[0]))
+        return true;
+    if (!std::isdigit(a[0]) && std::isdigit(b[0]))
+        return false;
+    if (!std::isdigit(a[0]) && !std::isdigit(b[0]))
+    {
+        if (std::toupper(a[0]) == std::toupper(b[0]))
+            return compareNat(a.substr(1), b.substr(1));
+        return (std::toupper(a[0]) < std::toupper(b[0]));
+    }
 
-	const double rvec_1[3] = { 1.12134992, 1.38173224, -1.33534398 };
-	const double rvec_2[3] = { 1.35616344, 2.10595134, -1.42210062 };
-	const double rvec_3[3] = { 1.56657549, 1.70420951, -0.85745274 };
-	const double rvec_4[3] = { 1.61963543, 1.33318051, -0.40598225 };
-	const double rvec_5[3] = { 1.61106379, 1.06166743, -0.11593372 };
-	const double rvec_6[3] = { 1.62660842, 1.28622777, -0.36563719 };
-	const double rvec_7[3] = { 1.58353979, 1.60199123, -0.73663599 };
-	const double rvec_8[3] = { 1.45545087, 1.96536236, -1.21193346 };
-	const double rvec_9[3] = { 1.62285857, 1.37495105, -0.47484482 };
-	const double rvec_10[3] = { 1.45590784, 1.95503687, -1.20259261 };
-	const double rvec_11[3] = { 1.56728623, 1.69647319, -0.84700537 };
-	const double rvec_12[3] = { 1.40849942, 2.04377181, -1.32444713 };
-	const double rvec_13[3] = { 1.22845501, 2.25730994, -1.67111105 };
-	const double rvec_14[3] = { 1.62762142, 1.19325915, -0.26631408 };
-	const double rvec_15[3] = { 1.60673483, 0.9429037, -0.00874077 };
+    /*Both strings begin with digit --> parse both numbers*/
+    std::istringstream issa(a);
+    std::istringstream issb(b);
+    int ia, ib;
+    issa >> ia;
+    issb >> ib;
+    if (ia != ib)
+        return ia < ib;
 
-
-
-	const double rvec_16[3] = { 1.12134992, 1.38173224, -1.33534398 };
-	const double rvec_17[3] = { 1.12134992, 1.38173224, -1.33534398 };
-	const double rvec_18[3] = { 1.12134992, 1.38173224, -1.33534398 };
-	const double rvec_19[3] = { 1.12134992, 1.38173224, -1.33534398 };
-	const double rvec_20[3] = { 1.12134992, 1.38173224, -1.33534398 };
-	const double rvec_21[3] = { 1.12134992, 1.38173224, -1.33534398 };
-	const double rvec_22[3] = { 1.12134992, 1.38173224, -1.33534398 };
-	const double rvec_23[3] = { 1.12134992, 1.38173224, -1.33534398 };
-	const double rvec_24[3] = { 1.12134992, 1.38173224, -1.33534398 };
-	const double rvec_25[3] = { 1.12134992, 1.38173224, -1.33534398 };
-
-
-	cv::glob(depth_path, depth_fileNames, false);
-	cv::glob(mask_path, mask_fileNames, false);
-	std::size_t i = 0;
-
-	pcl::PointCloud<pcl::PointXYZ> mergeCloud;
-	std::string mergeCloudPath = "D:/DATA/Research/DrNhu/demoData/red_bull/test_new_method_pc.ply";
-
-	for (auto const& f : depth_fileNames) {
-		// Read depth image using opencv2 and generate point cloud.
-		cv::Mat croppedImg;
-		cv::Mat depth_img = cv::imread(depth_fileNames[i], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-		cv::Mat mask_img = cv::imread(mask_fileNames[i]);
-
-		cv::resize(mask_img, mask_img, cv::Size(depth_img.cols, depth_img.rows), cv::INTER_LINEAR);
-
-		// Calculate bouding box from mask image and crop image	
-		double bbX, bbY, bbWidth, bbHeight;
-		get_bounding_box_from_mask_image(mask_img, depth_img, bbX, bbY, bbWidth, bbHeight);
-		std::cout << "x = " << bbX << "; y = " << bbY << "; width = " << bbWidth << "; height = " << bbHeight << std::endl;
-		depth_img(cv::Rect(bbX, bbY, bbWidth, bbHeight)).copyTo(croppedImg);
-
-		switch (depth_fileNames[i][34])
-		{
-		case '1':
-		{
-			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n1);
-			std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/depth\\";
-			std::string output = createPLYFileNames(depth_fileNames[i], toErase);
-			std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/pointCloud/" + output;
-			pcl::io::savePLYFileBinary(writePath, *cloud);
-			mergeCloud += *cloud;
-
-			std::cout << output << std::endl;
-			break;
-		}
-
-		case '2':
-		{
-			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n2);
-			std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/depth\\";
-			std::string output = createPLYFileNames(depth_fileNames[i], toErase);
-			std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/pointCloud/" + output;
-			pcl::io::savePLYFileBinary(writePath, *cloud);
-			mergeCloud += *cloud;
-
-			std::cout << output << std::endl;
-			break;
-		}
-
-		case '3':
-		{
-			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n3);
-			std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/depth\\";
-			std::string output = createPLYFileNames(depth_fileNames[i], toErase);
-			std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/pointCloud/" + output;
-			pcl::io::savePLYFileBinary(writePath, *cloud);
-			mergeCloud += *cloud;
-
-			std::cout << output << std::endl;
-			break;
-		}
-
-		case '4':
-		{
-			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n4);
-			std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/depth\\";
-			std::string output = createPLYFileNames(depth_fileNames[i], toErase);
-			std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/pointCloud/" + output;
-			pcl::io::savePLYFileBinary(writePath, *cloud);
-			mergeCloud += *cloud;
-
-			std::cout << output << std::endl;
-			break;
-		}
-
-		default:
-		{
-			pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n5);
-			std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/depth\\";
-			std::string output = createPLYFileNames(depth_fileNames[i], toErase);
-			std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/pointCloud/" + output;
-			pcl::io::savePLYFileBinary(writePath, *cloud);
-			mergeCloud += *cloud;
-
-			std::cout << output << std::endl;
-			break;
-		}
-		}
-
-		/*pcl::visualization::CloudViewer viewer("Depth");
-		viewer.showCloud(cloud);
-		while(!viewer.wasStopped()) {}*/
-
-		i++;
-	}
-
-	pcl::io::savePLYFileBinary(mergeCloudPath, mergeCloud);
+    /*Numbers are the same --> remove numbers and recurse*/
+    std::string anew, bnew;
+    std::getline(issa, anew);
+    std::getline(issb, bnew);
+    return (compareNat(anew, bnew));
 }
 
-void read_csv_file(std::string csv_path) {
+void choose_matrix_each_view(std::string data_path) {
 
+    std::vector<std::string> rgb_fileNames;
+    cv::glob(data_path, rgb_fileNames);
+    std::sort(rgb_fileNames.begin(), rgb_fileNames.end(), compareNat);
+
+    
+
+    unsigned int i = 0;
+    for (auto const& f : rgb_fileNames) {
+        unsigned int j = 0;
+        while (j <= 3) {
+
+            std::cout << rgb_fileNames[i] << std::endl;
+
+            j++;
+            i++;
+        }
+        std::cout << "--------------------------------------------------------" << std::endl;
+        j = 0;
+
+    }
+
+}
+
+
+void test_process_frame(std::string data_path)
+{
+    const double intrinsic_n1[4] = { 570.31691719, 570.31988743, 314.9278689 , 228.59060364 };
+    const double intrinsic_n2[4] = { 572.31327882, 572.31155976, 314.34439596, 228.35836425 };
+	const double intrinsic_n3[4] = { 568.84098602, 568.84158184, 313.36329231, 224.84618475 };
+    const double intrinsic_n4[4] = { 567.32716271, 567.33372616, 314.1614329 , 224.48692976 };
+    const double intrinsic_n5[4] = { 573.52677509, 573.52154604, 314.03605057, 214.29659054 };
+
+    Eigen::Matrix4f pose_mat;
+    pose_mat << -0.26760542, 0.96350539, 0.0066906121,
+        0.91891062, 0.25729588, -0.29900187,
+        -0.28981137, -0.073866442, -0.95422906;
+
+    Eigen::Vector2f tvec;
+    tvec << -7.97246752e-02, 1.17495444e-01, 8.92708035e-01;
+
+    Eigen::Matrix4f NP1toNP5;
+    NP1toNP5 << 0.99843731, 0.05475579, -0.01116875, -0.03335538,
+        0.01421443, -0.05555295, 0.99835456, -0.82327339,
+        0.05404523, -0.9969532, -0.05624446, 0.72417926,
+        0., 0., 0., 1.;
+    Eigen::Matrix4f NP2toNP5;
+    NP2toNP5 << 0.99874538, 0.01566433, -0.04756353, 0.01239749,
+        0.03735488, 0.39952589, 0.91596052, -0.77269939,
+        0.03335078, -0.91658807, 0.3984395, 0.38541563,
+        0., 0., 0., 1.;
+    Eigen::Matrix4f NP3toNP5;
+    NP3toNP5 << 0.99908355, 0.0032791, -0.04267682, -0.01360154,
+        0.02657465, 0.7340928, 0.67852895, -0.56790004,
+        0.03355371, -0.67904124, 0.7333329, 0.13025396,
+        0., 0., 0., 1.;
+    Eigen::Matrix4f NP4toNP5;
+    NP4toNP5 << 0.99917161, -0.01583408, -0.03748825, 0.00281982,
+        0.02972207, 0.91317723, 0.40647748, -0.27856183,
+        0.02779722, -0.40725499, 0.91289139, 0.03491665,
+        0., 0., 0., 1.;
+    Eigen::Matrix4f NP5toNP5 = Eigen::Matrix4f::Identity();
+    /*-----------------------------------------------------------*/
+
+    Eigen::Matrix4f N1toNP5;
+    N1toNP5 << 0.99928155, -0.03780454, -0.00268218, -0.02972586,
+        0.00526974, 0.06851348, 0.99763627, -0.85452296,
+        -0.03753142, -0.99693366, 0.06866347, 0.63487774,
+        0., 0., 0., 1.;
+    Eigen::Matrix4f N2toNP5;
+    N2toNP5 << 0.99874839, -0.04903673, 0.00985108, -0.03305605,
+        0.0169128, 0.51646127, 0.85614351, -0.76596183,
+        -0.04707017, -0.85490535, 0.51664421, 0.29782426,
+        0., 0., 0., 1.;
+    Eigen::Matrix4f N3toNP5;
+    N3toNP5 << 9.99092384e-01, -2.60667955e-02, 3.36887372e-02, -7.57782945e-02,
+        9.17920253e-04, 8.03883670e-01, 5.94785846e-01, -5.22380423e-01,
+        -4.25859867e-02, -5.94215085e-01, 8.03177979e-01, 9.04279362e-02,
+        0., 0., 0., 1.;
+    Eigen::Matrix4f N4toNP5;
+    N4toNP5 << 0.99931699, -0.01651251, 0.03305894, -0.05964673,
+        0.00486274, 0.945592, 0.32531851, -0.22312939,
+        -0.0366321, -0.32493555, 0.94502644, 0.03106564,
+        0., 0., 0., 1.;
+
+    Eigen::Matrix4f N5toNP5;
+    N5toNP5 << 9.99894391e-01, -3.38543082e-05, 1.45329238e-02, -6.21285000e-02,
+        -2.04278424e-04, 9.99865753e-01, 1.63839443e-02, 6.50627640e-02,
+        -1.45315274e-02, -1.63851828e-02, 9.99760151e-01, 2.16908848e-02,
+        0., 0., 0., 1.;
+
+    std::string rgb_path = data_path + "/rgb_test_one_frame/*.jpg";
+    std::string mask_path = data_path + "/mask_test_one_frame/*.pbm";
+    std::string depth_path = data_path + "/depth_test_one_frame/*.png";
+    std::vector<std::string> rgb_fileNames, mask_fileNames, depth_fileNames;
+
+    cv::glob(rgb_path, rgb_fileNames, false);
+    cv::glob(mask_path, mask_fileNames, false);
+    cv::glob(depth_path, depth_fileNames, false);
+
+    int index_fileNames = 0;
+
+    std::string mergeCloudPath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/allPointCloud.ply";
+    pcl::PointCloud<pcl::PointXYZ> mergeCloud;
+
+    for (auto const& f : depth_fileNames)
+    {
+        cv::Mat croppedImg;
+        cv::Mat rgb_image = cv::imread(rgb_fileNames[index_fileNames]);
+        cv::Mat mask_image = cv::imread(mask_fileNames[index_fileNames]);
+        cv::Mat depth_image = cv::imread(depth_fileNames[index_fileNames], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+
+        double bbX, bbY, bbWidth, bbHeight;
+        get_bounding_box_from_mask_image(mask_image, depth_image, bbX, bbY, bbWidth, bbHeight);
+        depth_image(cv::Rect(bbX, bbY, bbWidth, bbHeight)).copyTo(croppedImg);
+
+        switch (depth_fileNames[index_fileNames][79])
+        {
+        case '1':
+        {
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n1);
+            pcl::transformPointCloud(*cloud, *cloud, NP1toNP5.inverse());
+            std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/depth_test_one_frame\\";
+            std::string output = createPLYFileNames(depth_fileNames[index_fileNames], toErase);
+            std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/" + output;
+            pcl::io::savePLYFileBinary(writePath, *cloud);
+            mergeCloud += *cloud;
+
+            std::cout << output << std::endl;
+            break;
+        }
+
+        case '2':
+        {
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n2);
+            pcl::transformPointCloud(*cloud, *cloud, NP2toNP5.inverse());
+            std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/depth_test_one_frame\\";
+            std::string output = createPLYFileNames(depth_fileNames[index_fileNames], toErase);
+            std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/" + output;
+            pcl::io::savePLYFileBinary(writePath, *cloud);
+            mergeCloud += *cloud;
+
+            std::cout << output << std::endl;
+            break;
+        }
+
+        case '3':
+        {
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n3);
+            pcl::transformPointCloud(*cloud, *cloud, NP3toNP5.inverse());
+            std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/depth_test_one_frame\\";
+            std::string output = createPLYFileNames(depth_fileNames[index_fileNames], toErase);
+            std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/" + output;
+            pcl::io::savePLYFileBinary(writePath, *cloud);
+            mergeCloud += *cloud;
+
+            std::cout << output << std::endl;
+            break;
+        }
+
+        case '4':
+        {
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n4);
+            pcl::transformPointCloud(*cloud, *cloud, NP4toNP5.inverse());
+            std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/depth_test_one_frame\\";
+            std::string output = createPLYFileNames(depth_fileNames[index_fileNames], toErase);
+            std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/" + output;
+            pcl::io::savePLYFileBinary(writePath, *cloud);
+            mergeCloud += *cloud;
+
+            std::cout << output << std::endl;
+            break;
+        }
+
+        default:
+        {
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n5);
+            pcl::transformPointCloud(*cloud, *cloud, NP5toNP5.inverse());
+            std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/depth_test_one_frame\\";
+            std::string output = createPLYFileNames(depth_fileNames[index_fileNames], toErase);
+            std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/" + output;
+            pcl::io::savePLYFileBinary(writePath, *cloud);
+            mergeCloud += *cloud;
+
+            std::cout << output << std::endl;
+            break;
+        }
+        }
+        index_fileNames++;
+    }
+    pcl::io::savePLYFileBinary(mergeCloudPath, mergeCloud);
 }

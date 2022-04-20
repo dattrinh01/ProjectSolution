@@ -3,6 +3,8 @@
 #include "generatePointCloud.h"
 #include "ReadPointCloud.h"
 
+#include "test_genPCMethod.h"
+
 // Test RANSAC
 #include <pcl/io/ply_io.h>
 #include <pcl/io/pcd_io.h>
@@ -420,12 +422,36 @@ int main(int argc, char* argv[]) {
 	std::vector<std::vector<cv::Point2f> > imgpoints;
 	test_camera_calib(objpoints, imgpoints);*/
 
+	/*std::string csv_file_path = "D:/DATA/Research/DrNhu/ImageProcessing/rvecs_tvecs/NP1_rvecs.csv";
 
-	pcl::PointCloud<pcl::PointXYZ>::Ptr merge_point_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	std::string depth_path = "D:/DATA/Research/DrNhu/demoData/red_bull/depth/*.png";
-	std::string mask_path = "D:/DATA/Research/DrNhu/demoData/red_bull/masks/*.pbm";
+	Eigen::MatrixXf matrix = readCSV(csv_file_path, 26, 3);
+	
+	std::cout << matrix;*/
 
-	cutPointCloud(depth_path, mask_path);
+	std::string data_path = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data";
+	test_process_frame(data_path);
+
+	/*cv::Mat rotMat;
+
+	cv::Mat cameraMatrix_Mat = (cv::Mat_<float>(3, 3) <<
+		567.32716271, 0., 314.1614329,
+		0., 567.33372616, 224.48692976,
+		0., 0., 1.);
+	cv::Mat tvec_Mat = (cv::Mat_<float>(3, 1) <<
+		-7.97246752e-02, 1.17495444e-01, 8.92708035e-01
+		);
+	cv::Mat rvec_Mat = (cv::Mat_<float>(3, 1) <<
+		1.77309998, 2.33516184, -0.35121504
+		);
+
+	cv::Mat I = cv::Mat::eye(cv::Size(3, 3), CV_32F);
+	cv::Rodrigues(rvec_Mat, rotMat);
+	cv::Mat minus_tvecs = -1 * tvec_Mat;
+
+	std::vector<cv::Mat> IC_vec = { rotMat, minus_tvecs };
+	cv::Mat IC_Mat;
+	cv::hconcat(IC_vec, IC_Mat);
+	std::cout << rotMat << std::endl;*/
 
 	return 0;
 }
