@@ -1,7 +1,17 @@
 ﻿  calibration.cpp
-D:\DATA\Research\DrNhuResearch\ProjectSolution\ProjectSolution\calibration.h(2,10): fatal error C1083: Cannot open include file: 'opencv2/opencv.hpp': No such file or directory
+D:\DATA\Research\DrNhu\ProjectSolution\ProjectSolution\calibration.h(2,10): fatal error C1083: Cannot open include file: 'opencv2/opencv.hpp': No such file or directory
+  camera_calibration_sample.cpp
+D:\DATA\Research\DrNhu\ProjectSolution\ProjectSolution\camera_calibration_sample.cpp(7,10): fatal error C1083: Cannot open include file: 'opencv2/core.hpp': No such file or directory
   extractPointCloudInBoundingBox.cpp
-D:\DATA\Research\DrNhuResearch\ProjectSolution\ProjectSolution\extractPointCloudInBoundingBox.h(3,10): fatal error C1083: Cannot open include file: 'pcl/io/pcd_io.h': No such file or directory
-  generatePointCloud.cpp
-D:\DATA\Research\DrNhuResearch\ProjectSolution\ProjectSolution\generatePointCloud.h(3,10): fatal error C1083: Cannot open include file: 'opencv2/opencv.hpp': No such file or directory
+D:\DATA\Research\DrNhu\ProjectSolution\ProjectSolution\extractPointCloudInBoundingBox.h(4,10): fatal error C1083: Cannot open include file: 'pcl/io/ply_io.h': No such file or directory
   extract2DBoundingBoxFromMaskImage.cpp
+D:\DATA\Research\DrNhu\ProjectSolution\ProjectSolution\extract2DBoundingBoxFromMaskImage.h(6,10): fatal error C1083: Cannot open include file: 'opencv2/opencv.hpp': No such file or directory
+  main.cpp
+D:\DATA\Research\DrNhu\ProjectSolution\ProjectSolution\extract2DBoundingBoxFromMaskImage.h(6,10): fatal error C1083: Cannot open include file: 'opencv2/opencv.hpp': No such file or directory
+  generatePointCloud.cpp
+D:\DATA\Research\DrNhu\ProjectSolution\ProjectSolution\generatePointCloud.h(6,10): fatal error C1083: Cannot open include file: 'opencv2/opencv.hpp': No such file or directory
+  ReadPointCloud.cpp
+D:\DATA\Research\DrNhu\ProjectSolution\ProjectSolution\ReadPointCloud.h(5,10): fatal error C1083: Cannot open include file: 'opencv2/core.hpp': No such file or directory
+  test_genPCMethod.cpp
+D:\DATA\Research\DrNhu\ProjectSolution\ProjectSolution\test_genPCMethod.h(7,10): fatal error C1083: Cannot open include file: 'Eigen/Dense': No such file or directory
+  Generating Code...

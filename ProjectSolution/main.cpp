@@ -4,6 +4,8 @@
 #include "ReadPointCloud.h"
 
 #include "test_genPCMethod.h"
+#include "test_ICP.h"
+#include "test_math.h"
 
 // Test RANSAC
 #include <pcl/io/ply_io.h>
@@ -15,6 +17,7 @@
 //
 // Test transforms point cloud
 #include <pcl/common/transforms.h>
+#include <pcl/features/normal_3d.h>
 //
 
 void Extract_PointCloud_from_Bounding_Box() {
@@ -388,49 +391,7 @@ void test_pose_estimation() {
 
 
 int main(int argc, char* argv[]) {
-	//Extract_PointCloud_from_Bounding_Box();
-	// test_bounding_box_mask_image();
-	// test_ransac();
-	// read_pcd("D:/DATA/Research/demoData/pointCloud/NP1_0.ply");
-	//test_scaling_rgb2depth();
-	// test_transform_point_cloud();
-
-	/*cv::Mat rotMat;
-
-	cv::Mat cameraMatrix_Mat = (cv::Mat_<float>(3, 3) <<
-		1.07698399e+03, 0., 6.32802558e+02, 
-		0., 1.07698137e+03, 4.86992442e+02, 
-		0., 0., 1.);
-	cv::Mat tvec_Mat = (cv::Mat_<float>(3, 1) <<
-		-6.60162824e-02, -1.75282704e-01, 7.54902240e-01
-		);
-	cv::Mat rvec_Mat = (cv::Mat_<float>(3, 1) <<
-		-3.51487941e-02, 8.23152514e-04, 9.62536640e-01
-		);
-
-	cv::Mat I = cv::Mat::eye(cv::Size(3, 3), CV_32F);
-	cv::Rodrigues(rvec_Mat, rotMat);
-	cv::Mat minus_tvecs = -1 * tvec_Mat;
-
-	std::vector<cv::Mat> IC_vec = { rotMat, minus_tvecs };
-	cv::Mat IC_Mat;
-	cv::hconcat(IC_vec, IC_Mat);
-	std::cout << cameraMatrix_Mat * IC_Mat << std::endl;*/
-	//test_pose_estimation();
-
-	/*std::vector<std::vector<cv::Point3f> > objpoints;
-	std::vector<std::vector<cv::Point2f> > imgpoints;
-	test_camera_calib(objpoints, imgpoints);*/
-
-	/*std::string csv_file_path = "D:/DATA/Research/DrNhu/ImageProcessing/rvecs_tvecs/NP1_rvecs.csv";
-
-	Eigen::MatrixXf matrix = readCSV(csv_file_path, 26, 3);
 	
-	std::cout << matrix;*/
-
-	std::string data_path = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data";
-	test_process_frame(data_path);
-
 	/*cv::Mat rotMat;
 
 	cv::Mat cameraMatrix_Mat = (cv::Mat_<float>(3, 3) <<
@@ -438,20 +399,102 @@ int main(int argc, char* argv[]) {
 		0., 567.33372616, 224.48692976,
 		0., 0., 1.);
 	cv::Mat tvec_Mat = (cv::Mat_<float>(3, 1) <<
-		-7.97246752e-02, 1.17495444e-01, 8.92708035e-01
+		-0.06679843, 0.11049553, 0.95330164
 		);
 	cv::Mat rvec_Mat = (cv::Mat_<float>(3, 1) <<
-		1.77309998, 2.33516184, -0.35121504
+		1.86946257, 2.43995792, -0.16521102
 		);
 
 	cv::Mat I = cv::Mat::eye(cv::Size(3, 3), CV_32F);
 	cv::Rodrigues(rvec_Mat, rotMat);
+
 	cv::Mat minus_tvecs = -1 * tvec_Mat;
 
 	std::vector<cv::Mat> IC_vec = { rotMat, minus_tvecs };
 	cv::Mat IC_Mat;
-	cv::hconcat(IC_vec, IC_Mat);
-	std::cout << rotMat << std::endl;*/
+	cv::hconcat(IC_vec, IC_Mat);*/
+	
+
+	
+
+	Eigen::Matrix4f N1toNP5;
+	N1toNP5 << 0.99928155, -0.03780454, -0.00268218, -0.02972586,
+		0.00526974, 0.06851348, 0.99763627, -0.85452296,
+		-0.03753142, -0.99693366, 0.06866347, 0.63487774,
+		0., 0., 0., 1.;
+	Eigen::Matrix4f N2toNP5;
+	N2toNP5 << 0.99874839, -0.04903673, 0.00985108, -0.03305605,
+		0.0169128, 0.51646127, 0.85614351, -0.76596183,
+		-0.04707017, -0.85490535, 0.51664421, 0.29782426,
+		0., 0., 0., 1.;
+	Eigen::Matrix4f N3toNP5;
+	N3toNP5 << 9.99092384e-01, -2.60667955e-02, 3.36887372e-02, -7.57782945e-02,
+		9.17920253e-04, 8.03883670e-01, 5.94785846e-01, -5.22380423e-01,
+		-4.25859867e-02, -5.94215085e-01, 8.03177979e-01, 9.04279362e-02,
+		0., 0., 0., 1.;
+	Eigen::Matrix4f N4toNP5;
+	N4toNP5 << 0.99931699, -0.01651251, 0.03305894, -0.05964673,
+		0.00486274, 0.945592, 0.32531851, -0.22312939,
+		-0.0366321, -0.32493555, 0.94502644, 0.03106564,
+		0., 0., 0., 1.;
+
+	Eigen::Matrix4f N5toNP5;
+	N5toNP5 << 9.99894391e-01, -3.38543082e-05, 1.45329238e-02, -6.21285000e-02,
+		-2.04278424e-04, 9.99865753e-01, 1.63839443e-02, 6.50627640e-02,
+		-1.45315274e-02, -1.63851828e-02, 9.99760151e-01, 2.16908848e-02,
+		0., 0., 0., 1.;
+
+	std::string data_path = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data";
+	test_process_frame(data_path);
+	/*process();*/
+	
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_2(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_3(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_4(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5(new pcl::PointCloud<pcl::PointXYZ>);
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1_transform(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_2_transform(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_3_transform(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_4_transform(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5_transform(new pcl::PointCloud<pcl::PointXYZ>);
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr merge(new pcl::PointCloud<pcl::PointXYZ>);
+
+	pcl::io::loadPLYFile<pcl::PointXYZ>("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP1_pc.ply", *cloud_1);
+	pcl::io::loadPLYFile<pcl::PointXYZ>("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP2_pc.ply", *cloud_2);
+	pcl::io::loadPLYFile<pcl::PointXYZ>("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP3_pc.ply", *cloud_3);
+	pcl::io::loadPLYFile<pcl::PointXYZ>("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP4_pc.ply", *cloud_4);
+	pcl::io::loadPLYFile<pcl::PointXYZ>("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP5_pc.ply", *cloud_5);
+
+	pcl::transformPointCloud(*cloud_4, *cloud_4_transform, N4toNP5);
+	pcl::transformPointCloud(*cloud_5, *cloud_5_transform, N5toNP5);
+	*merge = *cloud_4_transform + *cloud_5_transform;
+	pcl::io::savePLYFile("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/merge.ply", *merge);
+
+
+
+
+
+	/*pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_2(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_3(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_4(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5(new pcl::PointCloud<pcl::PointXYZ>);
+	std::string np1_path = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP1_pc.ply";
+	std::string np5_path = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP5_pc.ply";
+	pcl::io::loadPLYFile<pcl::PointXYZ>(np1_path, *cloud_1);
+	pcl::io::loadPLYFile<pcl::PointXYZ>(np5_path, *cloud_5);
+	
+	pcl::visualization::CloudViewer viewer("Cloud");
+	viewer.showCloud(cloud_2);
+	while (!viewer.wasStopped())
+	{
+
+	}*/
+
+	
 
 	return 0;
 }

@@ -31,6 +31,9 @@
     <Filter Include="Source Files\extractPointCloudFromBoundingBox">
       <UniqueIdentifier>{6a173100-d176-47b2-aa81-ca34e54f7875}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\test_math">
+      <UniqueIdentifier>{b9d77766-453f-4013-b012-081d2decb530}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="calibration.cpp">
@@ -55,6 +58,12 @@
     <ClCompile Include="test_genPCMethod.cpp">
       <Filter>Source Files\AnotherGeneratePointCloud</Filter>
     </ClCompile>
+    <ClCompile Include="test_ICP.cpp">
+      <Filter>Source Files\AnotherGeneratePointCloud</Filter>
+    </ClCompile>
+    <ClCompile Include="test_math.cpp">
+      <Filter>Source Files\test_math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ReadPointCloud.h">
@@ -74,6 +83,12 @@
     </ClInclude>
     <ClInclude Include="test_genPCMethod.h">
       <Filter>Source Files\AnotherGeneratePointCloud</Filter>
+    </ClInclude>
+    <ClInclude Include="test_ICP.h">
+      <Filter>Source Files\AnotherGeneratePointCloud</Filter>
+    </ClInclude>
+    <ClInclude Include="test_math.h">
+      <Filter>Source Files\test_math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

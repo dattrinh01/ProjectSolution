@@ -99,19 +99,15 @@ void choose_matrix_each_view(std::string data_path) {
 
 void test_process_frame(std::string data_path)
 {
+    pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud2(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud3(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud4(new pcl::PointCloud<pcl::PointXYZ>());
+
     const double intrinsic_n1[4] = { 570.31691719, 570.31988743, 314.9278689 , 228.59060364 };
     const double intrinsic_n2[4] = { 572.31327882, 572.31155976, 314.34439596, 228.35836425 };
 	const double intrinsic_n3[4] = { 568.84098602, 568.84158184, 313.36329231, 224.84618475 };
     const double intrinsic_n4[4] = { 567.32716271, 567.33372616, 314.1614329 , 224.48692976 };
     const double intrinsic_n5[4] = { 573.52677509, 573.52154604, 314.03605057, 214.29659054 };
-
-    Eigen::Matrix4f pose_mat;
-    pose_mat << -0.26760542, 0.96350539, 0.0066906121,
-        0.91891062, 0.25729588, -0.29900187,
-        -0.28981137, -0.073866442, -0.95422906;
-
-    Eigen::Vector2f tvec;
-    tvec << -7.97246752e-02, 1.17495444e-01, 8.92708035e-01;
 
     Eigen::Matrix4f NP1toNP5;
     NP1toNP5 << 0.99843731, 0.05475579, -0.01116875, -0.03335538,
@@ -174,8 +170,10 @@ void test_process_frame(std::string data_path)
 
     int index_fileNames = 0;
 
-    std::string mergeCloudPath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/allPointCloud.ply";
-    pcl::PointCloud<pcl::PointXYZ> mergeCloud;
+    std::string mergeCloudPath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/allPointCloud.ply";
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudC(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5(new pcl::PointCloud<pcl::PointXYZ>);
 
     for (auto const& f : depth_fileNames)
     {
@@ -188,79 +186,50 @@ void test_process_frame(std::string data_path)
         get_bounding_box_from_mask_image(mask_image, depth_image, bbX, bbY, bbWidth, bbHeight);
         depth_image(cv::Rect(bbX, bbY, bbWidth, bbHeight)).copyTo(croppedImg);
 
-        switch (depth_fileNames[index_fileNames][79])
-        {
-        case '1':
-        {
-            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n1);
-            pcl::transformPointCloud(*cloud, *cloud, NP1toNP5.inverse());
-            std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/depth_test_one_frame\\";
-            std::string output = createPLYFileNames(depth_fileNames[index_fileNames], toErase);
-            std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/" + output;
-            pcl::io::savePLYFileBinary(writePath, *cloud);
-            mergeCloud += *cloud;
 
-            std::cout << output << std::endl;
-            break;
+        
+
+        if (depth_fileNames[index_fileNames][79] == '5')
+        {
+            cloudC = generatePointCloud(croppedImg, intrinsic_n5);
+            /*pcl::transformPointCloud(*cloud_5, *cloud_5, NP5toNP5);*/
+
+            pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP5_pc.ply", *cloudC);
         }
 
-        case '2':
+        if (depth_fileNames[index_fileNames][79] == '4')
         {
-            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n2);
-            pcl::transformPointCloud(*cloud, *cloud, NP2toNP5.inverse());
-            std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/depth_test_one_frame\\";
-            std::string output = createPLYFileNames(depth_fileNames[index_fileNames], toErase);
-            std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/" + output;
-            pcl::io::savePLYFileBinary(writePath, *cloud);
-            mergeCloud += *cloud;
-
-            std::cout << output << std::endl;
-            break;
+            cloud_1 = generatePointCloud(croppedImg, intrinsic_n4);
+            /*pcl::transformPointCloud(*cloud_1, *cloud_1, N4toNP5);*/
+            pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP4_pc.ply", *cloud_1);
         }
 
-        case '3':
+        if (depth_fileNames[index_fileNames][79] == '1')
         {
-            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n3);
-            pcl::transformPointCloud(*cloud, *cloud, NP3toNP5.inverse());
-            std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/depth_test_one_frame\\";
-            std::string output = createPLYFileNames(depth_fileNames[index_fileNames], toErase);
-            std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/" + output;
-            pcl::io::savePLYFileBinary(writePath, *cloud);
-            mergeCloud += *cloud;
+            cloudC = generatePointCloud(croppedImg, intrinsic_n1);
+            /*pcl::transformPointCloud(*cloud_5, *cloud_5, NP5toNP5);*/
 
-            std::cout << output << std::endl;
-            break;
+            pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP1_pc.ply", *cloudC);
         }
 
-        case '4':
+        if (depth_fileNames[index_fileNames][79] == '2')
         {
-            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n4);
-            pcl::transformPointCloud(*cloud, *cloud, NP4toNP5.inverse());
-            std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/depth_test_one_frame\\";
-            std::string output = createPLYFileNames(depth_fileNames[index_fileNames], toErase);
-            std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/" + output;
-            pcl::io::savePLYFileBinary(writePath, *cloud);
-            mergeCloud += *cloud;
+            cloudC = generatePointCloud(croppedImg, intrinsic_n2);
+            /*pcl::transformPointCloud(*cloud_5, *cloud_5, NP5toNP5);*/
 
-            std::cout << output << std::endl;
-            break;
+            pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP2_pc.ply", *cloudC);
         }
 
-        default:
+        if (depth_fileNames[index_fileNames][79] == '3')
         {
-            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloud(croppedImg, intrinsic_n5);
-            pcl::transformPointCloud(*cloud, *cloud, NP5toNP5.inverse());
-            std::string toErase = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/depth_test_one_frame\\";
-            std::string output = createPLYFileNames(depth_fileNames[index_fileNames], toErase);
-            std::string writePath = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/" + output;
-            pcl::io::savePLYFileBinary(writePath, *cloud);
-            mergeCloud += *cloud;
+            cloudC = generatePointCloud(croppedImg, intrinsic_n3);
+            /*pcl::transformPointCloud(*cloud_5, *cloud_5, NP5toNP5);*/
 
-            std::cout << output << std::endl;
-            break;
-        }
+            pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP3_pc.ply", *cloudC);
         }
         index_fileNames++;
     }
-    pcl::io::savePLYFileBinary(mergeCloudPath, mergeCloud);
+
+    /**cloudC += *cloud_1;
+    pcl::io::savePLYFile("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/merge.ply", *cloudC);*/
 }

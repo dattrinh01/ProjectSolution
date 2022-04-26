@@ -150,6 +150,8 @@
     <ClCompile Include="generatePointCloud.cpp" />
     <ClCompile Include="ReadPointCloud.cpp" />
     <ClCompile Include="test_genPCMethod.cpp" />
+    <ClCompile Include="test_ICP.cpp" />
+    <ClCompile Include="test_math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="calibration.h" />
@@ -158,6 +160,8 @@
     <ClInclude Include="generatePointCloud.h" />
     <ClInclude Include="ReadPointCloud.h" />
     <ClInclude Include="test_genPCMethod.h" />
+    <ClInclude Include="test_ICP.h" />
+    <ClInclude Include="test_math.h" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="in_VID5.xml" />
