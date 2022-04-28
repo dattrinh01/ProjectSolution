@@ -7,6 +7,8 @@
 #include "test_ICP.h"
 #include "test_math.h"
 
+#include "transformToOriginalPoints.h"
+
 // Test RANSAC
 #include <pcl/io/ply_io.h>
 #include <pcl/io/pcd_io.h>
@@ -19,6 +21,20 @@
 #include <pcl/common/transforms.h>
 #include <pcl/features/normal_3d.h>
 //
+void Extract_PointCloud_from_Bounding_Box();
+void test_bounding_box_mask_image();
+void test_ransac();
+void test_scaling_rgb2depth();
+void testScalingBoundingBoxFromRGBImageToDepthImage();
+void test_transform_point_cloud();
+void drawAxes(cv::Mat& src_, cv::Mat& dst_, std::vector<cv::Point2d>& imgPts_, std::vector<cv::Point2f>& cornersSP_);
+void test_pose_estimation();
+
+int main(int argc, char* argv[]) {
+	applyConvertPointCloudToMatrix("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP1_pc.ply");
+	return 0;
+}
+
 
 void Extract_PointCloud_from_Bounding_Box() {
 	std::string depth_path = "D:/DATA/Research/demoData/red_bull/depth/*.png";
@@ -151,73 +167,7 @@ void test_scaling_rgb2depth() {
 	
 }
 
-/*
-void testScalingBoundingBoxFromRGBImageToDepthImage()
-{
-	// Initializing
-	std::cout << "testScalingBoundingBoxFromRGBImageToDepthImage:: Initializing./n";
-	std::string colorImageFilePath = "D:/Solutions/CamTrioSDK/TestCamTrioSDK/Debug/BoxFromColorToDepthImage/colorImage.jpg";
-	std::string depthImageFilePath = "D:/Solutions/CamTrioSDK/TestCamTrioSDK/Debug/BoxFromColorToDepthImage/depthImage.png";
-	std::string colorBoxFilePath = "D:/Solutions/CamTrioSDK/TestCamTrioSDK/Debug/BoxFromColorToDepthImage/colorBox.txt";
-	std::string pointCloudFilePath = "D:/Solutions/CamTrioSDK/TestCamTrioSDK/Debug/BoxFromColorToDepthImage/pointCloud.pcd";
 
-	// Reading data
-	std::cout << "testScalingBoundingBoxFromRGBImageToDepthImage::  Reading data./n";
-	std::cout << "/t Reading color image .../n";
-	cv::Mat colorImage = cv::imread(colorImageFilePath);
-	cv::Size colorImageSize = colorImage.size();
-	int cWidth = colorImageSize.width; int cHeight = colorImageSize.height;
-	double colorImageRatio = (double)cWidth / (double)cHeight;
-	std::cout << "/t/t Color Image size: " << colorImage.size() << std::endl;
-	std::cout << "/t/t Color Image Ratio: " << colorImageRatio << std::endl;
-
-	std::cout << "/t Reading depth image .../n";
-	cv::Mat depthImage = cv::imread(depthImageFilePath);
-	cv::Size depthImageSize = depthImage.size();
-	int dWidth = depthImageSize.width; int dHeight = depthImageSize.height;
-	double depthImageRatio = (double)dWidth / (double)dHeight;
-	std::cout << "/t/t Depth Image size: " << depthImage.size() << std::endl;
-	std::cout << "/t/t depthImageRatio: " << depthImageRatio << std::endl;
-
-	std::cout << "/t Reading color boxes .../n";
-	Eigen::MatrixXd colorBoxes = readMatrixXdFromCSVFile(colorBoxFilePath, ' '); std::cout << "/t/t Box size: " << colorBoxes.rows() << std::endl;
-	int xMin = colorBoxes(0, 0); int xMax = colorBoxes(0, 1);
-	int yMin = colorBoxes(0, 2); int yMax = colorBoxes(0, 3);
-	cv::Rect colorBox = cv::Rect(xMin, yMin, xMax - xMin, yMax - yMin); // xMin, yMin, width, height
-
-	std::cout << "/t Reading point cloud .../n";
-	pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloud(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::io::loadPCDFile<pcl::PointXYZ>(pointCloudFilePath, *pointCloud); std::cout << "/t/t The size of point cloud: " << pointCloud->points.size() << std::endl;
-
-	// Testing drawing color box on the color image
-	std::cout << "testScalingBoundingBoxFromRGBImageToDepthImage::  Testing drawing color box on the color image./n";
-	cv::Mat renderedColorImage = colorImage.clone();
-	cv::rectangle(renderedColorImage, colorBox, cv::Scalar(0, 0, 255), 2);
-	cv::imshow("RenderedColorImage", renderedColorImage);
-	cv::waitKey(0);
-
-	// Convert absolute coordinate to relative coordinate
-	std::cout << "testScalingBoundingBoxFromRGBImageToDepthImage:: Convert absolute coordinate to relative coordinate./n";
-	Eigen::Vector4d rColorBox = Eigen::Vector4d((double)colorBox.x / (double)cWidth, (double)colorBox.y / (double)cHeight,
-		(double)colorBox.width / (double)cWidth, (double)colorBox.height / (double)cHeight); // xMin, yMin, width, height
-	std::cout << "/t The absolute color box: " << colorBox << std::endl;
-	std::cout << "/t The relative color box: " << rColorBox.transpose() << std::endl;
-
-	// Convert relative coordinate to the depth image coordinate
-	std::cout << "testScalingBoundingBoxFromRGBImageToDepthImage:: Convert relative coordinate to the depth image coordinate./n";
-	cv::Rect dColorBox = cv::Rect(rColorBox.x() * dWidth, rColorBox.y() * dHeight, rColorBox.z() * dWidth, rColorBox.w() * dHeight);
-
-	// Test the bounding box
-	std::cout << "testScalingBoundingBoxFromRGBImageToDepthImage:: Test the bounding box./n";
-	cv::Mat renderedDepthImage = depthImage.clone();
-	cv::rectangle(renderedDepthImage, dColorBox, cv::Scalar(0, 0, 255), 2);
-	cv::imshow("RenderedDepthImage", renderedDepthImage);
-	cv::waitKey(0);
-
-	// Finalizing
-	std::cout << "testScalingBoundingBoxFromRGBImageToDepthImage:: Finalizing./n";
-}
-*/
 
 void test_transform_point_cloud() {
 
@@ -387,116 +337,6 @@ void test_pose_estimation() {
 		cv::hconcat(rotMat, tvec_Mat, rotTransMat);
 		std::cout << cameraMatrix_Mat * rotTransMat;*/
 	}
-}
-
-
-int main(int argc, char* argv[]) {
-	
-	/*cv::Mat rotMat;
-
-	cv::Mat cameraMatrix_Mat = (cv::Mat_<float>(3, 3) <<
-		567.32716271, 0., 314.1614329,
-		0., 567.33372616, 224.48692976,
-		0., 0., 1.);
-	cv::Mat tvec_Mat = (cv::Mat_<float>(3, 1) <<
-		-0.06679843, 0.11049553, 0.95330164
-		);
-	cv::Mat rvec_Mat = (cv::Mat_<float>(3, 1) <<
-		1.86946257, 2.43995792, -0.16521102
-		);
-
-	cv::Mat I = cv::Mat::eye(cv::Size(3, 3), CV_32F);
-	cv::Rodrigues(rvec_Mat, rotMat);
-
-	cv::Mat minus_tvecs = -1 * tvec_Mat;
-
-	std::vector<cv::Mat> IC_vec = { rotMat, minus_tvecs };
-	cv::Mat IC_Mat;
-	cv::hconcat(IC_vec, IC_Mat);*/
-	
-
-	
-
-	Eigen::Matrix4f N1toNP5;
-	N1toNP5 << 0.99928155, -0.03780454, -0.00268218, -0.02972586,
-		0.00526974, 0.06851348, 0.99763627, -0.85452296,
-		-0.03753142, -0.99693366, 0.06866347, 0.63487774,
-		0., 0., 0., 1.;
-	Eigen::Matrix4f N2toNP5;
-	N2toNP5 << 0.99874839, -0.04903673, 0.00985108, -0.03305605,
-		0.0169128, 0.51646127, 0.85614351, -0.76596183,
-		-0.04707017, -0.85490535, 0.51664421, 0.29782426,
-		0., 0., 0., 1.;
-	Eigen::Matrix4f N3toNP5;
-	N3toNP5 << 9.99092384e-01, -2.60667955e-02, 3.36887372e-02, -7.57782945e-02,
-		9.17920253e-04, 8.03883670e-01, 5.94785846e-01, -5.22380423e-01,
-		-4.25859867e-02, -5.94215085e-01, 8.03177979e-01, 9.04279362e-02,
-		0., 0., 0., 1.;
-	Eigen::Matrix4f N4toNP5;
-	N4toNP5 << 0.99931699, -0.01651251, 0.03305894, -0.05964673,
-		0.00486274, 0.945592, 0.32531851, -0.22312939,
-		-0.0366321, -0.32493555, 0.94502644, 0.03106564,
-		0., 0., 0., 1.;
-
-	Eigen::Matrix4f N5toNP5;
-	N5toNP5 << 9.99894391e-01, -3.38543082e-05, 1.45329238e-02, -6.21285000e-02,
-		-2.04278424e-04, 9.99865753e-01, 1.63839443e-02, 6.50627640e-02,
-		-1.45315274e-02, -1.63851828e-02, 9.99760151e-01, 2.16908848e-02,
-		0., 0., 0., 1.;
-
-	std::string data_path = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data";
-	test_process_frame(data_path);
-	/*process();*/
-	
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_2(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_3(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_4(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5(new pcl::PointCloud<pcl::PointXYZ>);
-
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1_transform(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_2_transform(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_3_transform(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_4_transform(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5_transform(new pcl::PointCloud<pcl::PointXYZ>);
-
-	pcl::PointCloud<pcl::PointXYZ>::Ptr merge(new pcl::PointCloud<pcl::PointXYZ>);
-
-	pcl::io::loadPLYFile<pcl::PointXYZ>("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP1_pc.ply", *cloud_1);
-	pcl::io::loadPLYFile<pcl::PointXYZ>("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP2_pc.ply", *cloud_2);
-	pcl::io::loadPLYFile<pcl::PointXYZ>("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP3_pc.ply", *cloud_3);
-	pcl::io::loadPLYFile<pcl::PointXYZ>("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP4_pc.ply", *cloud_4);
-	pcl::io::loadPLYFile<pcl::PointXYZ>("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP5_pc.ply", *cloud_5);
-
-	pcl::transformPointCloud(*cloud_4, *cloud_4_transform, N4toNP5);
-	pcl::transformPointCloud(*cloud_5, *cloud_5_transform, N5toNP5);
-	*merge = *cloud_4_transform + *cloud_5_transform;
-	pcl::io::savePLYFile("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/merge.ply", *merge);
-
-
-
-
-
-	/*pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_2(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_3(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_4(new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5(new pcl::PointCloud<pcl::PointXYZ>);
-	std::string np1_path = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP1_pc.ply";
-	std::string np5_path = "D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP5_pc.ply";
-	pcl::io::loadPLYFile<pcl::PointXYZ>(np1_path, *cloud_1);
-	pcl::io::loadPLYFile<pcl::PointXYZ>(np5_path, *cloud_5);
-	
-	pcl::visualization::CloudViewer viewer("Cloud");
-	viewer.showCloud(cloud_2);
-	while (!viewer.wasStopped())
-	{
-
-	}*/
-
-	
-
-	return 0;
 }
 
 

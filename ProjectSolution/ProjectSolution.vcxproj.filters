@@ -34,6 +34,9 @@
     <Filter Include="Source Files\test_math">
       <UniqueIdentifier>{b9d77766-453f-4013-b012-081d2decb530}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\trainingFolder">
+      <UniqueIdentifier>{5466449e-03bc-449e-8ce2-cd09f19d99b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="calibration.cpp">
@@ -64,6 +67,9 @@
     <ClCompile Include="test_math.cpp">
       <Filter>Source Files\test_math</Filter>
     </ClCompile>
+    <ClCompile Include="transformToOriginalPoints.cpp">
+      <Filter>Source Files\trainingFolder</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ReadPointCloud.h">
@@ -89,6 +95,9 @@
     </ClInclude>
     <ClInclude Include="test_math.h">
       <Filter>Source Files\test_math</Filter>
+    </ClInclude>
+    <ClInclude Include="transformToOriginalPoints.h">
+      <Filter>Source Files\trainingFolder</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
