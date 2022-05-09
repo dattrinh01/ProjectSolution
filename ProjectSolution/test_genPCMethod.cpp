@@ -193,15 +193,15 @@ void test_process_frame(std::string data_path)
         {
             cloudC = generatePointCloud(croppedImg, intrinsic_n5);
             /*pcl::transformPointCloud(*cloud_5, *cloud_5, NP5toNP5);*/
-
-            pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP5_pc.ply", *cloudC);
+            pcl::io::savePCDFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP5_pc.pcd", *cloudC);
+            /*pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP5_pc.ply", *cloudC);*/
         }
 
         if (depth_fileNames[index_fileNames][79] == '4')
         {
             cloud_1 = generatePointCloud(croppedImg, intrinsic_n4);
             /*pcl::transformPointCloud(*cloud_1, *cloud_1, N4toNP5);*/
-            pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP4_pc.ply", *cloud_1);
+            pcl::io::savePCDFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP4_pc.pcd", *cloud_1);
         }
 
         if (depth_fileNames[index_fileNames][79] == '1')
@@ -209,7 +209,7 @@ void test_process_frame(std::string data_path)
             cloudC = generatePointCloud(croppedImg, intrinsic_n1);
             /*pcl::transformPointCloud(*cloud_5, *cloud_5, NP5toNP5);*/
 
-            pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP1_pc.ply", *cloudC);
+            pcl::io::savePCDFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP1_pc.pcd", *cloudC);
         }
 
         if (depth_fileNames[index_fileNames][79] == '2')
@@ -217,7 +217,7 @@ void test_process_frame(std::string data_path)
             cloudC = generatePointCloud(croppedImg, intrinsic_n2);
             /*pcl::transformPointCloud(*cloud_5, *cloud_5, NP5toNP5);*/
 
-            pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP2_pc.ply", *cloudC);
+            pcl::io::savePCDFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP2_pc.pcd", *cloudC);
         }
 
         if (depth_fileNames[index_fileNames][79] == '3')
@@ -225,7 +225,7 @@ void test_process_frame(std::string data_path)
             cloudC = generatePointCloud(croppedImg, intrinsic_n3);
             /*pcl::transformPointCloud(*cloud_5, *cloud_5, NP5toNP5);*/
 
-            pcl::io::savePLYFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP3_pc.ply", *cloudC);
+            pcl::io::savePCDFileBinary("D:/DATA/Research/DrNhu/demoData/red_bull/one_frame_data/pointCloud/NP3_pc.pcd", *cloudC);
         }
         index_fileNames++;
     }
