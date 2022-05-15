@@ -5,6 +5,7 @@
 #include <vector>
 #include <string.h>
 #include <string>
+#include <fstream>
 
 #include <opencv2/opencv.hpp>
 #include <Eigen/Eigen>
