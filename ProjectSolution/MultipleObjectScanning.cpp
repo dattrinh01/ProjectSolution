@@ -402,15 +402,15 @@ void detectMultipleObjects()
 		eraseSubStrings(nameFile, toErase);
 
 		extractBoundingBoxFromMaskImage(mask_obj_1_img, bbX, bbY, bbWidth, bbHeight);
-		savePathName = outputFolder + object_1_path + "/" + nameFile + ".txt";
+		savePathName = outputFolder + "/class_0/" + nameFile + "_obj_1.txt";
 		boundingBoxCoordinate.open(savePathName);
 		boundingBoxCoordinate << "0 " + std::to_string(bbX / rgb_obj_1_img.rows) + " " + std::to_string(bbY / rgb_obj_1_img.cols) + " " +
 			std::to_string(bbWidth / rgb_obj_1_img.rows) + " " + std::to_string(bbHeight / rgb_obj_1_img.cols);
 		boundingBoxCoordinate.close();
-		cv::imwrite(outputFolder + "/object_1/" + nameFile + ".png", rgb_obj_1_img);
+		cv::imwrite(outputFolder + "/class_0/" + nameFile + "_obj_1.png", rgb_obj_1_img);
 
-		std::cout << "detectMultipleObjects:: Process data: Extract bounding box from mask images: Draw bounding box: "
-			<< outputFolder + "/" + nameFile + ".png" << std::endl;
+		std::cout << "detectMultipleObjects:: Process data: Extract bounding box from mask images: Save image: "
+			<< outputFolder + "/class_0/" + nameFile + "_obj_1.png" << std::endl;
 
 		std::cout << "detectMultipleObjects:: Process data: Extract bounding box from mask images: Write bounding box: "
 			<< savePathName << std::endl;
@@ -426,15 +426,15 @@ void detectMultipleObjects()
 		eraseSubStrings(nameFile, toErase);
 
 		extractBoundingBoxFromMaskImage(mask_obj_2_img, bbX, bbY, bbWidth, bbHeight);
-		savePathName = outputFolder + object_2_path + "/" + nameFile + ".txt";
+		savePathName = outputFolder + "/class_1/" + nameFile + "_obj_2.txt";
 		boundingBoxCoordinate.open(savePathName);
 		boundingBoxCoordinate << "1 " + std::to_string(bbX / rgb_obj_2_img.rows) + " " + std::to_string(bbY / rgb_obj_2_img.cols) + " " +
 			std::to_string(bbWidth / rgb_obj_2_img.rows) + " " + std::to_string(bbHeight / rgb_obj_2_img.cols);
 		boundingBoxCoordinate.close();
-		cv::imwrite(outputFolder + "/object_2/" + nameFile + ".png", rgb_obj_2_img);
+		cv::imwrite(outputFolder + "/class_1/" + nameFile + "_obj_2.png", rgb_obj_2_img);
 
-		std::cout << "detectMultipleObjects:: Process data: Extract bounding box from mask images: Draw bounding box: "
-			<< outputFolder + "/" + nameFile + ".png" << std::endl;
+		std::cout << "detectMultipleObjects:: Process data: Extract bounding box from mask images: Save image: "
+			<< outputFolder + "/class_1/" + nameFile + "_obj_2.png" << std::endl;
 
 		std::cout << "detectMultipleObjects:: Process data: Extract bounding box from mask images: Write bounding box: "
 			<< savePathName << std::endl;
@@ -449,16 +449,16 @@ void detectMultipleObjects()
 		eraseSubStrings(nameFile, toErase);
 
 		extractBoundingBoxFromMaskImage(mask_obj_3_img, bbX, bbY, bbWidth, bbHeight);
-		savePathName = outputFolder + object_3_path + "/" + nameFile + ".txt";
+		savePathName = outputFolder  + "/class_1/" + nameFile + "_obj_3.txt";
 		boundingBoxCoordinate.open(savePathName);
 
 		boundingBoxCoordinate << "1 " + std::to_string(bbX / rgb_obj_3_img.rows) + " " + std::to_string(bbY / rgb_obj_3_img.cols) + " " +
 			std::to_string(bbWidth / rgb_obj_3_img.rows) + " " + std::to_string(bbHeight / rgb_obj_3_img.cols);
 		boundingBoxCoordinate.close();
-		cv::imwrite(outputFolder + "/object_3/" + nameFile + ".png", rgb_obj_3_img);
+		cv::imwrite(outputFolder + "/class_1/" + nameFile + "_obj_3.png", rgb_obj_3_img);
 
-		std::cout << "detectMultipleObjects:: Process data: Extract bounding box from mask images: Draw bounding box: "
-			<< outputFolder + "/" + nameFile + ".png" << std::endl;
+		std::cout << "detectMultipleObjects:: Process data: Extract bounding box from mask images: Save image: "
+			<< outputFolder + "/class_1/" + nameFile + "_obj_3.png" << std::endl;
 
 		std::cout << "detectMultipleObjects:: Process data: Extract bounding box from mask images: Write bounding box: "
 			<< savePathName << std::endl;
