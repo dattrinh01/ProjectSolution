@@ -86,14 +86,19 @@ void extractBoundingBoxFromMaskImage(cv::Mat mask_img, double& bbX, double& bbY,
 	cv::cvtColor(mask_img, mSource_Gray, cv::COLOR_BGR2GRAY);
 	cv::threshold(mSource_Gray, mThreshold, 254, 255, cv::THRESH_BINARY_INV);
 	cv::Mat Points;
-	cv::findNonZero(mThreshold, Points);
+	findNonZero(mThreshold, Points);
 	cv::Rect Min_Rect = boundingRect(Points);
-	cv::Rect maskBoxes = cv::Rect(Min_Rect.tl().x, Min_Rect.tl().y, Min_Rect.br().x - Min_Rect.tl().x, Min_Rect.br().y - Min_Rect.tl().y);
-	
-	bbX = maskBoxes.x;
-	bbY = maskBoxes.y;
-	bbWidth = maskBoxes.width;
-	bbHeight = maskBoxes.height;
+
+	double x_min, x_max, y_min, y_max;
+	x_min = Min_Rect.tl().x;
+	y_min = Min_Rect.tl().y;
+	x_max = Min_Rect.br().x;
+	y_max = Min_Rect.br().y;
+
+	bbX = (x_min + x_max) / 2.0 / mask_img.size().width;
+	bbY = (y_min + y_max) / 2.0 / mask_img.size().height;
+	bbWidth = (x_max - x_min) / mask_img.size().width;
+	bbHeight = (y_max - y_min) / mask_img.size().height;
 }
 
 
@@ -322,7 +327,7 @@ void detectMultipleObjects()
 
 	std::cout << "detectMultipleObjects:: Process data: Extract bounding box from mask images" << std::endl;
 
-	
+
 
 	bool checkStatusReadData = false;
 	std::size_t index = 0;
@@ -404,8 +409,8 @@ void detectMultipleObjects()
 		extractBoundingBoxFromMaskImage(mask_obj_1_img, bbX, bbY, bbWidth, bbHeight);
 		savePathName = outputFolder + "/class_0/" + nameFile + "_obj_1.txt";
 		boundingBoxCoordinate.open(savePathName);
-		boundingBoxCoordinate << "0 " + std::to_string(bbX / rgb_obj_1_img.rows) + " " + std::to_string(bbY / rgb_obj_1_img.cols) + " " +
-			std::to_string(bbWidth / rgb_obj_1_img.rows) + " " + std::to_string(bbHeight / rgb_obj_1_img.cols);
+		boundingBoxCoordinate << "0 " + std::to_string(bbX) + " " + std::to_string(bbY) + " " +
+			std::to_string(bbWidth) + " " + std::to_string(bbHeight);
 		boundingBoxCoordinate.close();
 		cv::imwrite(outputFolder + "/class_0/" + nameFile + "_obj_1.png", rgb_obj_1_img);
 
@@ -428,8 +433,8 @@ void detectMultipleObjects()
 		extractBoundingBoxFromMaskImage(mask_obj_2_img, bbX, bbY, bbWidth, bbHeight);
 		savePathName = outputFolder + "/class_1/" + nameFile + "_obj_2.txt";
 		boundingBoxCoordinate.open(savePathName);
-		boundingBoxCoordinate << "1 " + std::to_string(bbX / rgb_obj_2_img.rows) + " " + std::to_string(bbY / rgb_obj_2_img.cols) + " " +
-			std::to_string(bbWidth / rgb_obj_2_img.rows) + " " + std::to_string(bbHeight / rgb_obj_2_img.cols);
+		boundingBoxCoordinate << "1 " + std::to_string(bbX) + " " + std::to_string(bbY) + " " +
+			std::to_string(bbWidth) + " " + std::to_string(bbHeight);
 		boundingBoxCoordinate.close();
 		cv::imwrite(outputFolder + "/class_1/" + nameFile + "_obj_2.png", rgb_obj_2_img);
 
@@ -449,11 +454,11 @@ void detectMultipleObjects()
 		eraseSubStrings(nameFile, toErase);
 
 		extractBoundingBoxFromMaskImage(mask_obj_3_img, bbX, bbY, bbWidth, bbHeight);
-		savePathName = outputFolder  + "/class_1/" + nameFile + "_obj_3.txt";
+		savePathName = outputFolder + "/class_1/" + nameFile + "_obj_3.txt";
 		boundingBoxCoordinate.open(savePathName);
 
-		boundingBoxCoordinate << "1 " + std::to_string(bbX / rgb_obj_3_img.rows) + " " + std::to_string(bbY / rgb_obj_3_img.cols) + " " +
-			std::to_string(bbWidth / rgb_obj_3_img.rows) + " " + std::to_string(bbHeight / rgb_obj_3_img.cols);
+		boundingBoxCoordinate << "1 " + std::to_string(bbX) + " " + std::to_string(bbY) + " " +
+			std::to_string(bbWidth) + " " + std::to_string(bbHeight);
 		boundingBoxCoordinate.close();
 		cv::imwrite(outputFolder + "/class_1/" + nameFile + "_obj_3.png", rgb_obj_3_img);
 
