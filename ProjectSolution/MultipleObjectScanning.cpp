@@ -195,87 +195,69 @@ void datasetGeneration()
 			cv::Mat object_2_rgb_img = cv::imread(object_2_rgbFileNames[index]);
 			cv::Mat object_3_rgb_img = cv::imread(object_3_rgbFileNames[index]);
 
-			if ((!object_1_rgb_img.empty()) && (!object_2_rgb_img.empty()) && (!object_3_rgb_img.empty()))
+			cv::Mat object_1_depth_img = cv::imread(object_1_depthFileNames[index]);
+			cv::Mat object_2_depth_img = cv::imread(object_2_depthFileNames[index]);
+			cv::Mat object_3_depth_img = cv::imread(object_3_depthFileNames[index]);
+
+			if ((!object_1_rgb_img.empty()) && (!object_2_rgb_img.empty()) && (!object_3_rgb_img.empty()) 
+				&& (!object_1_depth_img.empty()) && (!object_2_depth_img.empty()) && (!object_3_depth_img.empty()))
 			{
 				std::string nameFile = object_1_rgbFileNames[index].substr(object_1_rgbFileNames[index].find("\\") + 1);
 				std::string toErase = ".jpg";
 				eraseSubStrings(nameFile, toErase);
 
-				cv::Mat concatenateImage_object12_v, concatenateImage_object23_v, concatenateImage_object12_h, concatenateImage_object23_h;
-				cv::vconcat(object_1_rgb_img, object_2_rgb_img, concatenateImage_object12_v);
-				cv::vconcat(object_2_rgb_img, object_3_rgb_img, concatenateImage_object23_v);
-				cv::hconcat(object_1_rgb_img, object_2_rgb_img, concatenateImage_object12_h);
-				cv::hconcat(object_2_rgb_img, object_3_rgb_img, concatenateImage_object23_h);
+				cv::Mat concatenateImageRGB_object12_v, concatenateImageRGB_object23_v, concatenateImageRGB_object12_h, concatenateImageRGB_object23_h;
+				cv::Mat concatenateImageDepth_object12_v, concatenateImageDepth_object23_v, concatenateImageDepth_object12_h, concatenateImageDepth_object23_h;
+
+				cv::vconcat(object_1_rgb_img, object_2_rgb_img, concatenateImageRGB_object12_v);
+				cv::vconcat(object_2_rgb_img, object_3_rgb_img, concatenateImageRGB_object23_v);
+				cv::hconcat(object_1_rgb_img, object_2_rgb_img, concatenateImageRGB_object12_h);
+				cv::hconcat(object_2_rgb_img, object_3_rgb_img, concatenateImageRGB_object23_h);
+
+				cv::vconcat(object_1_depth_img, object_2_depth_img, concatenateImageDepth_object12_v);
+				cv::vconcat(object_2_depth_img, object_3_depth_img, concatenateImageDepth_object23_v);
+				cv::hconcat(object_1_depth_img, object_2_depth_img, concatenateImageDepth_object12_h);
+				cv::hconcat(object_2_depth_img, object_3_depth_img, concatenateImageDepth_object23_h);
 
 				std::string saveConcatenateImagePathObject12_v = outputFolder + "/Object12/rgb/" + nameFile + "_obj1_merge_" + nameFile + "_obj2_v.png";
 				std::string saveConcatenateImagePathObject23_v = outputFolder + "/Object23/rgb/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_v.png";
 				std::string saveConcatenateImagePathObject12_h = outputFolder + "/Object12/rgb/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_h.png";
 				std::string saveConcatenateImagePathObject23_h = outputFolder + "/Object23/rgb/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_h.png";
 
-				cv::imwrite(saveConcatenateImagePathObject12_v, concatenateImage_object12_v);
-				cv::imwrite(saveConcatenateImagePathObject23_v, concatenateImage_object23_v);
-				cv::imwrite(saveConcatenateImagePathObject12_h, concatenateImage_object12_h);
-				cv::imwrite(saveConcatenateImagePathObject23_h, concatenateImage_object23_h);
+				std::string saveConcatenateImageDepthPathObject12_v = outputFolder + "/Object12/depth/" + nameFile + "_obj1_merge_" + nameFile + "_obj2_v.png";
+				std::string saveConcatenateImageDepthPathObject23_v = outputFolder + "/Object23/depth/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_v.png";
+				std::string saveConcatenateImageDepthPathObject12_h = outputFolder + "/Object12/depth/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_h.png";
+				std::string saveConcatenateImageDepthPathObject23_h = outputFolder + "/Object23/depth/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_h.png";
+
+				cv::imwrite(saveConcatenateImagePathObject12_v, concatenateImageRGB_object12_v);
+				cv::imwrite(saveConcatenateImagePathObject23_v, concatenateImageRGB_object23_v);
+				cv::imwrite(saveConcatenateImagePathObject12_h, concatenateImageRGB_object12_h);
+				cv::imwrite(saveConcatenateImagePathObject23_h, concatenateImageRGB_object23_h);
+
+				cv::imwrite(saveConcatenateImageDepthPathObject12_v, concatenateImageDepth_object12_v);
+				cv::imwrite(saveConcatenateImageDepthPathObject23_v, concatenateImageDepth_object23_v);
+				cv::imwrite(saveConcatenateImageDepthPathObject12_h, concatenateImageDepth_object12_h);
+				cv::imwrite(saveConcatenateImageDepthPathObject23_h, concatenateImageDepth_object23_h);
 
 				std::cout << "datasetGeneration:: Process data: Merge rgb images: Save concatenate image: " << saveConcatenateImagePathObject12_v << std::endl;
 				std::cout << "datasetGeneration:: Process data: Merge rgb images: Save concatenate image: " << saveConcatenateImagePathObject23_v << std::endl;
 				std::cout << "datasetGeneration:: Process data: Merge rgb images: Save concatenate image: " << saveConcatenateImagePathObject12_h << std::endl;
 				std::cout << "datasetGeneration:: Process data: Merge rgb images: Save concatenate image: " << saveConcatenateImagePathObject23_h << std::endl;
+
+				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImageDepthPathObject12_v << std::endl;
+				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImageDepthPathObject23_v << std::endl;
+				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImageDepthPathObject12_h << std::endl;
+				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImageDepthPathObject23_h << std::endl;
 			}
 			else
 			{
 				std::cout << "datasetGeneration:: Process data: Merge rgb images: Failed: " << object_1_rgbFileNames[index] << std::endl;
 				std::cout << "datasetGeneration:: Process data: Merge rgb images: Failed: " << object_2_rgbFileNames[index] << std::endl;
 				std::cout << "datasetGeneration:: Process data: Merge rgb images: Failed: " << object_3_rgbFileNames[index] << std::endl;
-			}
-			index++;
-		}
 
-		index = 0;
-
-		std::cout << "datasetGeneration:: Process data: Merge depth images" << std::endl;
-
-		for (auto const& f : object_1_depthFileNames)
-		{
-			cv::Mat object_1_depth_img = cv::imread(object_1_depthFileNames[index]);
-			cv::Mat object_2_depth_img = cv::imread(object_2_depthFileNames[index]);
-			cv::Mat object_3_depth_img = cv::imread(object_3_depthFileNames[index]);
-
-			if ((!object_1_depth_img.empty()) && (!object_2_depth_img.empty()) && (!object_3_depth_img.empty()))
-			{
-				std::string nameFile = object_1_depthFileNames[index].substr(object_1_depthFileNames[index].find("\\") + 1);
-				std::string toErase = ".png";
-				eraseSubStrings(nameFile, toErase);
-
-				cv::Mat concatenateImage_object12_v, concatenateImage_object23_v, concatenateImage_object12_h, concatenateImage_object23_h;
-
-				cv::vconcat(object_1_depth_img, object_2_depth_img, concatenateImage_object12_v);
-				cv::vconcat(object_2_depth_img, object_3_depth_img, concatenateImage_object23_v);
-
-				cv::hconcat(object_1_depth_img, object_2_depth_img, concatenateImage_object12_h);
-				cv::hconcat(object_2_depth_img, object_3_depth_img, concatenateImage_object23_h);
-
-				std::string saveConcatenateImagePathObject12_v = outputFolder + "/Object12/depth/" + nameFile + "_obj1_merge_" + nameFile + "_obj2_v.png";
-				std::string saveConcatenateImagePathObject23_v = outputFolder + "/Object23/depth/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_v.png";
-
-				std::string saveConcatenateImagePathObject12_h = outputFolder + "/Object12/depth/" + nameFile + "_obj1_merge_" + nameFile + "_obj2_h.png";
-				std::string saveConcatenateImagePathObject23_h = outputFolder + "/Object23/depth/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_h.png";
-
-				cv::imwrite(saveConcatenateImagePathObject12_v, concatenateImage_object12_v);
-				cv::imwrite(saveConcatenateImagePathObject23_v, concatenateImage_object23_v);
-				cv::imwrite(saveConcatenateImagePathObject12_h, concatenateImage_object23_h);
-				cv::imwrite(saveConcatenateImagePathObject23_h, concatenateImage_object23_h);
-
-				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImagePathObject12_v << std::endl;
-				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImagePathObject23_v << std::endl;
-				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImagePathObject12_h << std::endl;
-				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImagePathObject23_h << std::endl;
-			}
-			else
-			{
-				std::cout << "datasetGeneration:: Process data: Merge depth images: Failed: " << object_1_depthFileNames[index] << std::endl;
-				std::cout << "datasetGeneration:: Process data: Merge depth images: Failed: " << object_2_depthFileNames[index] << std::endl;
-				std::cout << "datasetGeneration:: Process data: Merge depth images: Failed: " << object_3_depthFileNames[index] << std::endl;
+				std::cout << "datasetGeneration:: Process data: Merge rgb images: Failed: " << object_1_depthFileNames[index] << std::endl;
+				std::cout << "datasetGeneration:: Process data: Merge rgb images: Failed: " << object_2_depthFileNames[index] << std::endl;
+				std::cout << "datasetGeneration:: Process data: Merge rgb images: Failed: " << object_3_depthFileNames[index] << std::endl;
 			}
 			index++;
 		}
@@ -286,7 +268,7 @@ void datasetGeneration()
 	{
 		std::cout << "datasetGeneration:: Merge RGB and Depth image: Failed";
 	}
-	std::cout << "detectMultipleObjects:: Finalizing" << std::endl;
+	std::cout << "datasetGeneration:: Finalizing" << std::endl;
 
 }
 
@@ -488,8 +470,7 @@ void mainFunction()
 
 	/*Process data*/
 	std::cout << "mainFunction:: Process data" << std::endl;
-	/*datasetGeneration();*/
-	detectMultipleObjects();
+	datasetGeneration();
 	/*Finalizing*/
 	std::cout << "mainFunction:: Finalizing" << std::endl;
 }
