@@ -6,6 +6,7 @@
 #include <string.h>
 #include <string>
 #include <fstream>
+#include <iomanip>
 
 #include <opencv2/opencv.hpp>
 #include <Eigen/Eigen>
@@ -20,6 +21,8 @@ void eraseSubStrings(std::string& mainString, std::string& toErase);
 pcl::PointCloud<pcl::PointXYZ>::Ptr createPointCloud(cv::Mat depth_img, const double depth_intrinsic[4]);
 bool checkSubString(std::string mainString, std::string checkString);
 void extractBoundingBoxFromMaskImage(cv::Mat mask_img, double& bbX, double& bbY, double& bbWidth, double& bbHeight);
+pcl::PointCloud<pcl::PointXYZ>::Ptr generatePointCloudFromDepthImage(cv::Mat depth_img, const double depth_intrinsic[4]);
+void cropAndCreatePointCloud(std::string boundingBoxPath, std::string depthPath, std::string outputPath);
 /*-----------MAIN PROCESSING FUNCTIONS-----------*/
 void datasetGeneration();
 void detectMultipleObjects();
