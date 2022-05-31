@@ -600,10 +600,8 @@ void cutPointCloudOfDetectObjects()
 
 	const std::string inputFolder = mainFolder + "/Inputs";
 	const std::string object12PathInputBoundingBox = inputFolder + "/obj12/*.txt";
-	const std::string object23PathInputBoundingBox = inputFolder + "/obj23/*.txt";
 
 	const std::string object12PathInputImage = inputFolder + "/obj12/*.png";
-	const std::string object23PathInputImage = inputFolder + "/obj23/*.png";
 
 
 	const std::string outputPointCloudFolder = mainFolder + "/Outputs";
@@ -612,6 +610,12 @@ void cutPointCloudOfDetectObjects()
 
 	const std::string debugFolder = mainFolder + "/Debugs";
 
+	/*const double intrinsic_n1[4] = { 570.31691719, 570.31988743, 314.9278689, 228.59060364 };
+	const double intrinsic_n2[4] = { 572.31327882, 572.31155976, 314.34439596, 228.35836425 };
+	const double intrinsic_n3[4] = { 568.84098602, 568.84158184, 313.36329231, 224.84618475 };
+	const double intrinsic_n4[4] = { 567.32716271, 567.33372616, 314.1614329, 224.48692976 };
+	const double intrinsic_n5[4] = { 573.52677509, 573.52154604, 314.03605057, 214.29659054 };*/
+
 	const double intrinsic_n1[4] = { 571.15928878, 571.16352329, 311.07448762, 233.73421022 };
 	const double intrinsic_n2[4] = { 572.19350868, 572.19147096, 311.08874623, 228.22643626 };
 	const double intrinsic_n3[4] = { 569.22935734, 569.22937915, 308.72611105, 225.53660806 };
@@ -619,10 +623,7 @@ void cutPointCloudOfDetectObjects()
 	const double intrinsic_n5[4] = { 572.97665944, 572.96466485, 310.95680422, 215.36230807 };
 
 	std::vector<std::string> boundingBox12Path;
-	std::vector<std::string> boundingBox23Path;
-
 	std::vector<std::string> depthImage12Path;
-	std::vector<std::string> depthImage23Path;
 
 	std::size_t index = 0;
 	int count = 0;
@@ -635,760 +636,222 @@ void cutPointCloudOfDetectObjects()
 	std::cout << "cutPointCloudOfDetectObjects::Process data: Read data" << std::endl;
 
 	cv::glob(object12PathInputBoundingBox, boundingBox12Path);
-	cv::glob(object23PathInputBoundingBox, boundingBox23Path);
-
 	cv::glob(object12PathInputImage, depthImage12Path);
-	cv::glob(object23PathInputImage, depthImage23Path);
 
 	std::sort(boundingBox12Path.begin(), boundingBox12Path.end(), naturalSorting);
-	std::sort(boundingBox23Path.begin(), boundingBox23Path.end(), naturalSorting);
-
 	std::sort(depthImage12Path.begin(), depthImage12Path.end(), naturalSorting);
-	std::sort(depthImage23Path.begin(), depthImage23Path.end(), naturalSorting);
 
-	std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 23: " << std::endl;
-	for (auto const& f : depthImage23Path)
+
+	std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " << std::endl;
+	for (auto const& f : depthImage12Path)
 	{
-		nameBoundingBoxFile = boundingBox23Path[index];
+		nameBoundingBoxFile = boundingBox12Path[index];
 		eraseSubStrings(nameBoundingBoxFile, toEraseTXT);
 
-		nameDepthImageFile = depthImage23Path[index];
+		nameDepthImageFile = depthImage12Path[index];
 		eraseSubStrings(nameDepthImageFile, toErasePNG);
 
-		if (nameBoundingBoxFile == nameDepthImageFile) {
-			/*Read txt bounding box*/
-			/*Read bounding box while merge image*/
-			/*Cut depth frame from bounding box*/
-			/*Check NP_n to choose intrinsic matrix*/
-			/*Generate point cloud using correct intrinsics matrix*/
-			/*Save point cloud*/
-			std::string checkViewObject = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP")).substr(0, 3);
-			/*std::cout << checkViewObject << std::endl;*/
-			if (checkViewObject == "NP1")
+		std::string nameFile = nameDepthImageFile.substr(nameDepthImageFile.find("\\") + 1);
+
+		/* Read bounding box coordinate*/
+		std::ifstream inputfile(nameBoundingBoxFile + ".txt");
+		double boundingArr[2][5];
+		if (!inputfile.is_open())
+		{
+			std::cout << "Error opening file";
+		}
+		for (int r = 0; r < 2; r++)
+		{
+			for (int c = 0; c < 5; c++)
 			{
-				/* Read bounding box from YOLOv5*/
-				std::ifstream inputfile(boundingBox23Path[index]);
-				double boundingArr[2][5];
-				if (!inputfile.is_open())
-				{
-					std::cout << "Error opening file";
-				}
-				for (int r = 0; r < 2; r++)
-				{
-					for (int c = 0; c < 5; c++)
-					{
-						inputfile >> boundingArr[r][c];
-					}
-				}
+				inputfile >> boundingArr[r][c];
+			}
+		}
+		cv::Mat depth_img = cv::imread(depthImage12Path[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
 
-				for (int i = 0; i < 2; i++)
-				{
-					if (boundingArr[i][0] == 0)
-					{
-						std::string checkVerticalOrHorizontal = boundingBox23Path[index].substr(boundingBox23Path[index].find(".") - 1);
-						std::string test_output_path = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP"));
-						std::string savePath_1 = test_output_path.substr(0, test_output_path.find("_merge_"));
-						std::string savePath_2 = test_output_path.substr(test_output_path.find("_merge_") + 7);
 
-						std::string toErase = ".txt";
-						eraseSubStrings(savePath_2, toErase);
+		/* Check merge is horizontal or vertical*/
+		for (int r = 0; r < 2; r++)
+		{
+			nameDepthImageFile = depthImage12Path[index];
+			eraseSubStrings(nameDepthImageFile, toErasePNG);
 
-						if (checkVerticalOrHorizontal == "v.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
+			std::string nameDepthImgCropped = nameDepthImageFile.substr(nameDepthImageFile.find("\\") + 1).substr(0, nameDepthImageFile.substr(nameDepthImageFile.find("\\") + 1).find("1_merge_"));
 
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 640) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 960;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 640;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 960;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape0PathOutput + "/" + savePath_1 + "_v.png", croppedImg);
-							std::cout << shape0PathOutput + "/" + savePath_1 + "_v.png" << std::endl;
-							
-						}
-						else if (checkVerticalOrHorizontal == "h.txt")
-						{
-							boundingArr[i][1] *= 2560;
-							boundingArr[i][2] *= 1024;
-							boundingArr[i][3] *= 2560;
-							boundingArr[i][4] *= 1024;
-
-							boundingArr[i][1] = boundingArr[1][1] - boundingArr[1][3] / 2;
-							boundingArr[i][2] = boundingArr[1][2] - boundingArr[1][4] / 2;
-							boundingArr[i][3] = boundingArr[1][1] + boundingArr[1][3];
-							boundingArr[i][4] = boundingArr[1][2] + boundingArr[1][4];
-
-							boundingArr[i][1] = boundingArr[1][1] / 2560 * 1280;
-							boundingArr[i][2] = boundingArr[1][2] / 1024 * 480;
-							boundingArr[i][3] = boundingArr[1][3] / 2560 * 1280;
-							boundingArr[i][4] = boundingArr[1][4] / 1024 * 480;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape0PathOutput + "/" + savePath_2 + ".png", croppedImg);
-							std::cout << shape0PathOutput + "/" + savePath_2 + ".png" << std::endl;
-						}
-					}
-					else if (boundingArr[i][0] == 1)
-					{
-						std::string checkVerticalOrHorizontal = boundingBox23Path[index].substr(boundingBox23Path[index].find(".") - 1);
-						std::string test_output_path = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP"));
-						std::string savePath_1 = test_output_path.substr(0, test_output_path.find("_merge_"));
-						std::string savePath_2 = test_output_path.substr(test_output_path.find("_merge_") + 7);
-
-						std::string toErase = ".txt";
-						eraseSubStrings(savePath_2, toErase);
-
-						if (checkVerticalOrHorizontal == "v.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 640) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 960;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 640;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 960;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape1PathOutput + "/" + savePath_1 + "_v.png", croppedImg);
-							std::cout << shape1PathOutput + "/" + savePath_1 + "_v.png" << std::endl;
-
-						}
-						else if (checkVerticalOrHorizontal == "h.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 1280) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 480;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 1280;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 480;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape1PathOutput + "/" + savePath_2 + ".png", croppedImg);
-							std::cout << shape1PathOutput + "/" + savePath_2 + ".png" << std::endl;
-						}
-					}
-				}
-			}			
-
-			if (checkViewObject == "NP2")
+			if (nameDepthImageFile.back() == 'h')
 			{
-				/* Read bounding box from YOLOv5*/
-				std::ifstream inputfile(boundingBox23Path[index]);
-				double boundingArr[2][5];
-				if (!inputfile.is_open())
+				boundingArr[r][1] *= 2560;
+				boundingArr[r][2] *= 1024;
+				boundingArr[r][3] *= 2560;
+				boundingArr[r][4] *= 1024;
+
+				boundingArr[r][1] = boundingArr[r][1] - boundingArr[r][3] / 2;
+				boundingArr[r][2] = boundingArr[r][2] - boundingArr[r][4] / 2;
+				boundingArr[r][3] = boundingArr[r][1] + boundingArr[r][3];
+				boundingArr[r][4] = boundingArr[r][2] + boundingArr[r][4];
+
+				boundingArr[r][1] = (boundingArr[r][1] / 2560 * 1280) + 10;
+				boundingArr[r][2] = (boundingArr[r][2] / 1024 * 480);
+				boundingArr[r][3] = (boundingArr[r][3] / 2560 * 1280) + 10;
+				boundingArr[r][4] = (boundingArr[r][4] / 1024 * 480) + 10;
+
+				cv::Mat croppedImg;
+				depth_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg);
+
+				if (boundingArr[r][0] == 0) 
 				{
-					std::cout << "Error opening file";
-				}
-				for (int r = 0; r < 2; r++)
-				{
-					for (int c = 0; c < 5; c++)
+					if (nameDepthImgCropped.substr(0, 3) == "NP1")
 					{
-						inputfile >> boundingArr[r][c];
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n1);
+						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
+					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP2")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n2);
+						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
+					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP3")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n3);
+						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
+					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP4")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n4);
+						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
+					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP5")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n5);
+						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
 					}
 				}
 
-				for (int i = 0; i < 2; i++)
+				if (boundingArr[r][0] == 1) 
 				{
-					if (boundingArr[i][0] == 0)
+					if (nameDepthImgCropped.substr(0, 3) == "NP1")
 					{
-						std::string checkVerticalOrHorizontal = boundingBox23Path[index].substr(boundingBox23Path[index].find(".") - 1);
-						std::string test_output_path = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP"));
-						std::string savePath_1 = test_output_path.substr(0, test_output_path.find("_merge_"));
-						std::string savePath_2 = test_output_path.substr(test_output_path.find("_merge_") + 7);
-						std::string toErase = ".txt";
-						eraseSubStrings(savePath_2, toErase);
-
-						if (checkVerticalOrHorizontal == "v.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 640) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 960;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 640;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 960;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape0PathOutput + "/" + savePath_1 + "_v.png", croppedImg);
-							std::cout << shape0PathOutput + "/" + savePath_1 + "_v.png" << std::endl;
-
-						}
-						else if (checkVerticalOrHorizontal == "h.txt")
-						{
-							boundingArr[i][1] *= 2560;
-							boundingArr[i][2] *= 1024;
-							boundingArr[i][3] *= 2560;
-							boundingArr[i][4] *= 1024;
-
-							boundingArr[i][1] = boundingArr[1][1] - boundingArr[1][3] / 2;
-							boundingArr[i][2] = boundingArr[1][2] - boundingArr[1][4] / 2;
-							boundingArr[i][3] = boundingArr[1][1] + boundingArr[1][3];
-							boundingArr[i][4] = boundingArr[1][2] + boundingArr[1][4];
-
-							boundingArr[i][1] = boundingArr[1][1] / 2560 * 1280;
-							boundingArr[i][2] = boundingArr[1][2] / 1024 * 480;
-							boundingArr[i][3] = boundingArr[1][3] / 2560 * 1280;
-							boundingArr[i][4] = boundingArr[1][4] / 1024 * 480;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape0PathOutput + "/" + savePath_2 + ".png", croppedImg);
-							std::cout << shape0PathOutput + "/" + savePath_2 + ".png" << std::endl;
-						}
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n1);
+						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
 					}
-					else if (boundingArr[i][0] == 1)
+					else if (nameDepthImgCropped.substr(0, 3) == "NP2")
 					{
-						std::string checkVerticalOrHorizontal = boundingBox23Path[index].substr(boundingBox23Path[index].find(".") - 1);
-						std::string test_output_path = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP"));
-						std::string savePath_1 = test_output_path.substr(0, test_output_path.find("_merge_"));
-						std::string savePath_2 = test_output_path.substr(test_output_path.find("_merge_") + 7);
-
-						std::string toErase = ".txt";
-						eraseSubStrings(savePath_2, toErase);
-
-						if (checkVerticalOrHorizontal == "v.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 640) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 960;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 640;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 960;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape1PathOutput + "/" + savePath_1 + "_v.png", croppedImg);
-							std::cout << shape1PathOutput + "/" + savePath_1 + "_v.png" << std::endl;
-
-						}
-						else if (checkVerticalOrHorizontal == "h.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 1280) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 480;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 1280;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 480;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape1PathOutput + "/" + savePath_2 + ".png", croppedImg);
-							std::cout << shape1PathOutput + "/" + savePath_2 + ".png" << std::endl;
-						}
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n2);
+						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
 					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP3")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n3);
+						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
+					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP4")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n4);
+						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
+					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP5")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n5);
+						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
+					}
+
 				}
 			}
-
-			if (checkViewObject == "NP3")
+			else if (nameDepthImageFile.back() == 'v')
 			{
-				/* Read bounding box from YOLOv5*/
-				std::ifstream inputfile(boundingBox23Path[index]);
-				double boundingArr[2][5];
-				if (!inputfile.is_open())
+				boundingArr[r][1] *= 1280;
+				boundingArr[r][2] *= 2048;
+				boundingArr[r][3] *= 1280;
+				boundingArr[r][4] *= 2048;
+
+				boundingArr[r][1] = boundingArr[r][1] - boundingArr[r][3] / 2;
+				boundingArr[r][2] = boundingArr[r][2] - boundingArr[r][4] / 2;
+				boundingArr[r][3] = boundingArr[r][1] + boundingArr[r][3];
+				boundingArr[r][4] = boundingArr[r][2] + boundingArr[r][4];
+
+				boundingArr[r][1] = (boundingArr[r][1] / 1280 * 640) + 10;
+				boundingArr[r][2] = (boundingArr[r][2] / 2048 * 960);
+				boundingArr[r][3] = (boundingArr[r][3] / 1280 * 640) + 10;
+				boundingArr[r][4] = (boundingArr[r][4] / 2048 * 960) + 10;
+
+				cv::Mat croppedImg;
+				depth_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg);
+
+				if (boundingArr[r][0] == 0)
 				{
-					std::cout << "Error opening file";
-				}
-				for (int r = 0; r < 2; r++)
-				{
-					for (int c = 0; c < 5; c++)
+					if (nameDepthImgCropped.substr(0, 3) == "NP1")
 					{
-						inputfile >> boundingArr[r][c];
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n1);
+						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
+					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP2")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n2);
+						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
+					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP3")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n3);
+						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
+					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP4")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n4);
+						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
+					}
+					else if (nameDepthImgCropped.substr(0, 3) == "NP5")
+					{
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n5);
+						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
 					}
 				}
 
-				for (int i = 0; i < 2; i++)
+				if (boundingArr[r][0] == 1)
 				{
-					if (boundingArr[i][0] == 0)
+					if (nameDepthImgCropped.substr(0, 3) == "NP1")
 					{
-						std::string checkVerticalOrHorizontal = boundingBox23Path[index].substr(boundingBox23Path[index].find(".") - 1);
-						std::string test_output_path = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP"));
-						std::string savePath_1 = test_output_path.substr(0, test_output_path.find("_merge_"));
-						std::string savePath_2 = test_output_path.substr(test_output_path.find("_merge_") + 7);
-
-						std::string toErase = ".txt";
-						eraseSubStrings(savePath_2, toErase);
-
-						if (checkVerticalOrHorizontal == "v.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 640) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 960;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 640;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 960;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape0PathOutput + "/" + savePath_1 + "_v.png", croppedImg);
-							std::cout << shape0PathOutput + "/" + savePath_1 + "_v.png" << std::endl;
-
-						}
-						else if (checkVerticalOrHorizontal == "h.txt")
-						{
-							boundingArr[i][1] *= 2560;
-							boundingArr[i][2] *= 1024;
-							boundingArr[i][3] *= 2560;
-							boundingArr[i][4] *= 1024;
-
-							boundingArr[i][1] = boundingArr[1][1] - boundingArr[1][3] / 2;
-							boundingArr[i][2] = boundingArr[1][2] - boundingArr[1][4] / 2;
-							boundingArr[i][3] = boundingArr[1][1] + boundingArr[1][3];
-							boundingArr[i][4] = boundingArr[1][2] + boundingArr[1][4];
-
-							boundingArr[i][1] = boundingArr[1][1] / 2560 * 1280;
-							boundingArr[i][2] = boundingArr[1][2] / 1024 * 480;
-							boundingArr[i][3] = boundingArr[1][3] / 2560 * 1280;
-							boundingArr[i][4] = boundingArr[1][4] / 1024 * 480;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape0PathOutput + "/" + savePath_2 + ".png", croppedImg);
-							std::cout << shape0PathOutput + "/" + savePath_2 + ".png" << std::endl;
-						}
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n1);
+						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
 					}
-					else if (boundingArr[i][0] == 1)
+					else if (nameDepthImgCropped.substr(0, 3) == "NP2")
 					{
-						std::string checkVerticalOrHorizontal = boundingBox23Path[index].substr(boundingBox23Path[index].find(".") - 1);
-						std::string test_output_path = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP"));
-						std::string savePath_1 = test_output_path.substr(0, test_output_path.find("_merge_"));
-						std::string savePath_2 = test_output_path.substr(test_output_path.find("_merge_") + 7);
-
-						std::string toErase = ".txt";
-						eraseSubStrings(savePath_2, toErase);
-
-						if (checkVerticalOrHorizontal == "v.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 640) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 960;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 640;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 960;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape1PathOutput + "/" + savePath_1 + "_v.png", croppedImg);
-							std::cout << shape1PathOutput + "/" + savePath_1 + "_v.png" << std::endl;
-
-						}
-						else if (checkVerticalOrHorizontal == "h.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 1280) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 480;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 1280;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 480;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape1PathOutput + "/" + savePath_2 + ".png", croppedImg);
-							std::cout << shape1PathOutput + "/" + savePath_2 + ".png" << std::endl;
-						}
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n2);
+						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
 					}
-				}
-			}
-
-			if (checkViewObject == "NP4")
-			{
-				/* Read bounding box from YOLOv5*/
-				std::ifstream inputfile(boundingBox23Path[index]);
-				double boundingArr[2][5];
-				if (!inputfile.is_open())
-				{
-					std::cout << "Error opening file";
-				}
-				for (int r = 0; r < 2; r++)
-				{
-					for (int c = 0; c < 5; c++)
+					else if (nameDepthImgCropped.substr(0, 3) == "NP3")
 					{
-						inputfile >> boundingArr[r][c];
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n3);
+						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
 					}
-				}
-
-				for (int i = 0; i < 2; i++)
-				{
-					if (boundingArr[i][0] == 0)
+					else if (nameDepthImgCropped.substr(0, 3) == "NP4")
 					{
-						std::string checkVerticalOrHorizontal = boundingBox23Path[index].substr(boundingBox23Path[index].find(".") - 1);
-						std::string test_output_path = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP"));
-						std::string savePath_1 = test_output_path.substr(0, test_output_path.find("_merge_"));
-						std::string savePath_2 = test_output_path.substr(test_output_path.find("_merge_") + 7);
-
-						std::string toErase = ".txt";
-						eraseSubStrings(savePath_2, toErase);
-
-						if (checkVerticalOrHorizontal == "v.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 640) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 960;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 640;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 960;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape0PathOutput + "/" + savePath_1 + "_v.png", croppedImg);
-							std::cout << shape0PathOutput + "/" + savePath_1 + "_v.png" << std::endl;
-
-						}
-						else if (checkVerticalOrHorizontal == "h.txt")
-						{
-							boundingArr[i][1] *= 2560;
-							boundingArr[i][2] *= 1024;
-							boundingArr[i][3] *= 2560;
-							boundingArr[i][4] *= 1024;
-
-							boundingArr[i][1] = boundingArr[1][1] - boundingArr[1][3] / 2;
-							boundingArr[i][2] = boundingArr[1][2] - boundingArr[1][4] / 2;
-							boundingArr[i][3] = boundingArr[1][1] + boundingArr[1][3];
-							boundingArr[i][4] = boundingArr[1][2] + boundingArr[1][4];
-
-							boundingArr[i][1] = boundingArr[1][1] / 2560 * 1280;
-							boundingArr[i][2] = boundingArr[1][2] / 1024 * 480;
-							boundingArr[i][3] = boundingArr[1][3] / 2560 * 1280;
-							boundingArr[i][4] = boundingArr[1][4] / 1024 * 480;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape0PathOutput + "/" + savePath_2 + ".png", croppedImg);
-							std::cout << shape0PathOutput + "/" + savePath_2 + ".png" << std::endl;
-						}
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n4);
+						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
 					}
-					else if (boundingArr[i][0] == 1)
+					else if (nameDepthImgCropped.substr(0, 3) == "NP5")
 					{
-						std::string checkVerticalOrHorizontal = boundingBox23Path[index].substr(boundingBox23Path[index].find(".") - 1);
-						std::string test_output_path = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP"));
-						std::string savePath_1 = test_output_path.substr(0, test_output_path.find("_merge_"));
-						std::string savePath_2 = test_output_path.substr(test_output_path.find("_merge_") + 7);
-
-						std::string toErase = ".txt";
-						eraseSubStrings(savePath_2, toErase);
-
-						if (checkVerticalOrHorizontal == "v.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 640) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 960;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 640;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 960;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape1PathOutput + "/" + savePath_1 + "_v.png", croppedImg);
-							std::cout << shape1PathOutput + "/" + savePath_1 + "_v.png" << std::endl;
-
-						}
-						else if (checkVerticalOrHorizontal == "h.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 1280) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 480;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 1280;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 480;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape1PathOutput + "/" + savePath_2 + ".png", croppedImg);
-							std::cout << shape1PathOutput + "/" + savePath_2 + ".png" << std::endl;
-						}
-					}
-				}
-			}
-
-			if (checkViewObject == "NP5")
-			{
-				/* Read bounding box from YOLOv5*/
-				std::ifstream inputfile(boundingBox23Path[index]);
-				double boundingArr[2][5];
-				if (!inputfile.is_open())
-				{
-					std::cout << "Error opening file";
-				}
-				for (int r = 0; r < 2; r++)
-				{
-					for (int c = 0; c < 5; c++)
-					{
-						inputfile >> boundingArr[r][c];
-					}
-				}
-
-				for (int i = 0; i < 2; i++)
-				{
-					if (boundingArr[i][0] == 0)
-					{
-						std::string checkVerticalOrHorizontal = boundingBox23Path[index].substr(boundingBox23Path[index].find(".") - 1);
-						std::string test_output_path = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP"));
-						std::string savePath_1 = test_output_path.substr(0, test_output_path.find("_merge_"));
-						std::string savePath_2 = test_output_path.substr(test_output_path.find("_merge_") + 7);
-
-						std::string toErase = ".txt";
-						eraseSubStrings(savePath_2, toErase);
-
-						if (checkVerticalOrHorizontal == "v.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 640) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 960;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 640;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 960;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape0PathOutput + "/" + savePath_1 + "_v.png", croppedImg);
-							std::cout << shape0PathOutput + "/" + savePath_1 + "_v.png" << std::endl;
-
-						}
-						else if (checkVerticalOrHorizontal == "h.txt")
-						{
-							boundingArr[i][1] *= 2560;
-							boundingArr[i][2] *= 1024;
-							boundingArr[i][3] *= 2560;
-							boundingArr[i][4] *= 1024;
-
-							boundingArr[i][1] = boundingArr[1][1] - boundingArr[1][3] / 2;
-							boundingArr[i][2] = boundingArr[1][2] - boundingArr[1][4] / 2;
-							boundingArr[i][3] = boundingArr[1][1] + boundingArr[1][3];
-							boundingArr[i][4] = boundingArr[1][2] + boundingArr[1][4];
-
-							boundingArr[i][1] = boundingArr[1][1] / 2560 * 1280;
-							boundingArr[i][2] = boundingArr[1][2] / 1024 * 480;
-							boundingArr[i][3] = boundingArr[1][3] / 2560 * 1280;
-							boundingArr[i][4] = boundingArr[1][4] / 1024 * 480;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape0PathOutput + "/" + savePath_2 + ".png", croppedImg);
-							std::cout << shape0PathOutput + "/" + savePath_2 + ".png" << std::endl;
-						}
-					}
-					else if (boundingArr[i][0] == 1)
-					{
-						std::string checkVerticalOrHorizontal = boundingBox23Path[index].substr(boundingBox23Path[index].find(".") - 1);
-						std::string test_output_path = boundingBox23Path[index].substr(boundingBox23Path[index].find("NP"));
-						std::string savePath_1 = test_output_path.substr(0, test_output_path.find("_merge_"));
-						std::string savePath_2 = test_output_path.substr(test_output_path.find("_merge_") + 7);
-
-						std::string toErase = ".txt";
-						eraseSubStrings(savePath_2, toErase);
-
-						if (checkVerticalOrHorizontal == "v.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 640) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 960;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 640;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 960;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape1PathOutput + "/" + savePath_1 + "_v.png", croppedImg);
-							std::cout << shape1PathOutput + "/" + savePath_1 + "_v.png" << std::endl;
-
-						}
-						else if (checkVerticalOrHorizontal == "h.txt")
-						{
-							boundingArr[i][1] *= 1280;
-							boundingArr[i][2] *= 2048;
-							boundingArr[i][3] *= 1280;
-							boundingArr[i][4] *= 2048;
-
-							boundingArr[i][1] = boundingArr[i][1] - boundingArr[i][3] / 2;
-							boundingArr[i][2] = boundingArr[i][2] - boundingArr[i][4] / 2;
-							boundingArr[i][3] = boundingArr[i][1] + boundingArr[i][3];
-							boundingArr[i][4] = boundingArr[i][2] + boundingArr[i][4];
-
-							boundingArr[i][1] = (boundingArr[i][1] / 1280 * 1280) + 10;
-							boundingArr[i][2] = boundingArr[i][2] / 2048 * 480;
-							boundingArr[i][3] = boundingArr[i][3] / 1280 * 1280;
-							boundingArr[i][4] = boundingArr[i][4] / 2048 * 480;
-
-							cv::Mat croppedImg;
-							cv::Mat depth_frame = cv::imread(nameDepthImageFile + ".png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-							depth_frame(cv::Rect(boundingArr[i][1] + 10, boundingArr[i][2],
-								(boundingArr[i][3] - boundingArr[i][1]) + 10, (boundingArr[i][4] - boundingArr[i][2]) + 10)).copyTo(croppedImg);
-
-							cv::imwrite(shape1PathOutput + "/" + savePath_2 + ".png", croppedImg);
-							std::cout << shape1PathOutput + "/" + savePath_2 + ".png" << std::endl;
-						}
+						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n5);
+						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
+						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
 					}
 				}
 			}
