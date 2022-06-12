@@ -236,6 +236,60 @@ void cropAndCreatePointCloud(std::string boundingBoxPath, std::string depthPath,
 	}	
 }
 
+pcl::PointCloud<pcl::PointXYZ> convertEigenMatrixXdToPCLCloud(const Eigen::MatrixXd& inputMatrix, int height, int width)
+{
+	pcl::PointCloud<pcl::PointXYZ>::Ptr outputCloud(new pcl::PointCloud<pcl::PointXYZ>());
+	outputCloud->points.resize(inputMatrix.rows());
+	/*outputCloud->height = inputMatrix.rows();
+	outputCloud->width = 3;*/
+
+	outputCloud->height = height;
+	outputCloud->width = width;
+
+	for (unsigned int i = 0; i < outputCloud->points.size(); i++) {
+		pcl::PointXYZ point;
+		point.x = inputMatrix(i, 0);
+		point.y = inputMatrix(i, 1);
+		point.z = inputMatrix(i, 2);
+		outputCloud->points[i] = point;
+	}
+	return *outputCloud;
+}
+
+Eigen::MatrixXd convertPCLCloudToEigenMatrixXd(const pcl::PointCloud<pcl::PointXYZ>::Ptr& inputCloud)
+{
+	Eigen::MatrixXd outputBuffer(inputCloud->points.size(), 3);
+	for (unsigned int i = 0; i < outputBuffer.rows(); i++) {
+		Eigen::RowVector3d point = Eigen::RowVector3d(inputCloud->points[i].x, inputCloud->points[i].y, inputCloud->points[i].z);
+		outputBuffer.row(i) = point / 1000.0;
+	}
+	return outputBuffer;
+}
+
+Eigen::Matrix4f transformVerticesFromPointToPoint(const Eigen::MatrixXd& targetVertices,
+	const Eigen::Vector3d fromPoint, const Eigen::Vector3d toPoint, Eigen::MatrixXd& outPoints)
+{
+	Eigen::MatrixXd outputBuffer;
+	Eigen::Vector3d diffVector = (toPoint - fromPoint);
+	Eigen::Matrix4f transform = Eigen::Matrix4f::Identity();
+	transform(0, 3) = diffVector.x(); transform(1, 3) = diffVector.y(); transform(2, 3) = diffVector.z();
+	outputBuffer = transformPointsWithTransformMatrix(targetVertices, transform);
+	outPoints = outputBuffer;
+	return transform;
+}
+
+Eigen::MatrixXd transformPointsWithTransformMatrix(const Eigen::MatrixXd inputVertices, const Eigen::Matrix4f transformMatrix)
+{
+	pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZ>::Ptr transformedCloud(new pcl::PointCloud<pcl::PointXYZ>());
+	Eigen::MatrixXd outputMatrix;
+
+	*sourceCloud = convertEigenMatrixXdToPCLCloud(inputVertices, 4413, 3);
+	pcl::transformPointCloud(*sourceCloud, *transformedCloud, transformMatrix);
+	outputMatrix = convertPCLCloudToEigenMatrixXd(transformedCloud);
+	return outputMatrix;
+}
+
 /*-----------MAIN PROCESSING FUNCTIONS-----------*/
 
 void datasetGeneration()
@@ -340,48 +394,48 @@ void datasetGeneration()
 				std::string toErase = ".jpg";
 				eraseSubStrings(nameFile, toErase);
 
-				cv::Mat concatenateImageRGB_object12_v, concatenateImageRGB_object23_v, concatenateImageRGB_object12_h, concatenateImageRGB_object23_h;
-				cv::Mat concatenateImageDepth_object12_v, concatenateImageDepth_object23_v, concatenateImageDepth_object12_h, concatenateImageDepth_object23_h;
+				cv::Mat concatenateImageRGB_object12_v, concatenateImageRGB_object13_v, concatenateImageRGB_object12_h, concatenateImageRGB_object13_h;
+				cv::Mat concatenateImageDepth_object12_v, concatenateImageDepth_object13_v, concatenateImageDepth_object12_h, concatenateImageDepth_object13_h;
 
 				cv::vconcat(object_1_rgb_img, object_2_rgb_img, concatenateImageRGB_object12_v);
-				cv::vconcat(object_2_rgb_img, object_3_rgb_img, concatenateImageRGB_object23_v);
+				cv::vconcat(object_1_rgb_img, object_3_rgb_img, concatenateImageRGB_object13_v);
 				cv::hconcat(object_1_rgb_img, object_2_rgb_img, concatenateImageRGB_object12_h);
-				cv::hconcat(object_2_rgb_img, object_3_rgb_img, concatenateImageRGB_object23_h);
+				cv::hconcat(object_1_rgb_img, object_3_rgb_img, concatenateImageRGB_object13_h);
 
 				cv::vconcat(object_1_depth_img, object_2_depth_img, concatenateImageDepth_object12_v);
-				cv::vconcat(object_2_depth_img, object_3_depth_img, concatenateImageDepth_object23_v);
+				cv::vconcat(object_1_depth_img, object_3_depth_img, concatenateImageDepth_object13_v);
 				cv::hconcat(object_1_depth_img, object_2_depth_img, concatenateImageDepth_object12_h);
-				cv::hconcat(object_2_depth_img, object_3_depth_img, concatenateImageDepth_object23_h);
+				cv::hconcat(object_1_depth_img, object_3_depth_img, concatenateImageDepth_object13_h);
 
 				std::string saveConcatenateImagePathObject12_v = outputFolder + "/Object12/rgb/" + nameFile + "_obj1_merge_" + nameFile + "_obj2_v.png";
-				std::string saveConcatenateImagePathObject23_v = outputFolder + "/Object23/rgb/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_v.png";
+				std::string saveConcatenateImagePathObject13_v = outputFolder + "/Object13/rgb/" + nameFile + "_obj1_merge_" + nameFile + "_obj3_v.png";
 				std::string saveConcatenateImagePathObject12_h = outputFolder + "/Object12/rgb/" + nameFile + "_obj1_merge_" + nameFile + "_obj2_h.png";
-				std::string saveConcatenateImagePathObject23_h = outputFolder + "/Object23/rgb/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_h.png";
+				std::string saveConcatenateImagePathObject13_h = outputFolder + "/Object13/rgb/" + nameFile + "_obj1_merge_" + nameFile + "_obj3_h.png";
 
 				std::string saveConcatenateImageDepthPathObject12_v = outputFolder + "/Object12/depth/" + nameFile + "_obj1_merge_" + nameFile + "_obj2_v.png";
-				std::string saveConcatenateImageDepthPathObject23_v = outputFolder + "/Object23/depth/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_v.png";
+				std::string saveConcatenateImageDepthPathObject13_v = outputFolder + "/Object13/depth/" + nameFile + "_obj1_merge_" + nameFile + "_obj3_v.png";
 				std::string saveConcatenateImageDepthPathObject12_h = outputFolder + "/Object12/depth/" + nameFile + "_obj1_merge_" + nameFile + "_obj2_h.png";
-				std::string saveConcatenateImageDepthPathObject23_h = outputFolder + "/Object23/depth/" + nameFile + "_obj2_merge_" + nameFile + "_obj3_h.png";
+				std::string saveConcatenateImageDepthPathObject13_h = outputFolder + "/Object13/depth/" + nameFile + "_obj1_merge_" + nameFile + "_obj3_h.png";
 
 				cv::imwrite(saveConcatenateImagePathObject12_v, concatenateImageRGB_object12_v);
-				cv::imwrite(saveConcatenateImagePathObject23_v, concatenateImageRGB_object23_v);
+				cv::imwrite(saveConcatenateImagePathObject13_v, concatenateImageRGB_object13_v);
 				cv::imwrite(saveConcatenateImagePathObject12_h, concatenateImageRGB_object12_h);
-				cv::imwrite(saveConcatenateImagePathObject23_h, concatenateImageRGB_object23_h);
+				cv::imwrite(saveConcatenateImagePathObject13_h, concatenateImageRGB_object13_h);
 
 				cv::imwrite(saveConcatenateImageDepthPathObject12_v, concatenateImageDepth_object12_v);
-				cv::imwrite(saveConcatenateImageDepthPathObject23_v, concatenateImageDepth_object23_v);
+				cv::imwrite(saveConcatenateImageDepthPathObject13_v, concatenateImageDepth_object13_v);
 				cv::imwrite(saveConcatenateImageDepthPathObject12_h, concatenateImageDepth_object12_h);
-				cv::imwrite(saveConcatenateImageDepthPathObject23_h, concatenateImageDepth_object23_h);
+				cv::imwrite(saveConcatenateImageDepthPathObject13_h, concatenateImageDepth_object13_h);
 
 				std::cout << "datasetGeneration:: Process data: Merge rgb images: Save concatenate image: " << saveConcatenateImagePathObject12_v << std::endl;
-				std::cout << "datasetGeneration:: Process data: Merge rgb images: Save concatenate image: " << saveConcatenateImagePathObject23_v << std::endl;
+				std::cout << "datasetGeneration:: Process data: Merge rgb images: Save concatenate image: " << saveConcatenateImagePathObject13_v << std::endl;
 				std::cout << "datasetGeneration:: Process data: Merge rgb images: Save concatenate image: " << saveConcatenateImagePathObject12_h << std::endl;
-				std::cout << "datasetGeneration:: Process data: Merge rgb images: Save concatenate image: " << saveConcatenateImagePathObject23_h << std::endl;
+				std::cout << "datasetGeneration:: Process data: Merge rgb images: Save concatenate image: " << saveConcatenateImagePathObject13_h << std::endl;
 
 				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImageDepthPathObject12_v << std::endl;
-				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImageDepthPathObject23_v << std::endl;
+				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImageDepthPathObject13_v << std::endl;
 				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImageDepthPathObject12_h << std::endl;
-				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImageDepthPathObject23_h << std::endl;
+				std::cout << "datasetGeneration:: Process data: Merge depth images: Save concatenate image: " << saveConcatenateImageDepthPathObject13_h << std::endl;
 			}
 			else
 			{
@@ -594,21 +648,37 @@ void detectMultipleObjects()
 
 void cutPointCloudOfDetectObjects()
 {
+
+
+	/*
+	Replace 2_shape1 to 3_shape1
+	Replace /obj12_h and /obj12_v to /obj13_h and /obj13_v
+	Replace const std::string object_2_path = "/object_2" to const std::string object_2_path = "/object_3";
+	*/
 	std::cout << "cutPointCloudOfDetectObjects:: Initialization" << std::endl;
 
-	const std::string mainFolder = "D:/DATA/Research/DrNhu/ProjectSolutionFolder/cutPointCloudOfDetectObjects";
+	const std::string mainMergeFolder = "D:/DATA/Research/DrNhu/ProjectSolutionFolder/cutPointCloudOfDetectObjects";
 
-	const std::string inputFolder = mainFolder + "/Inputs";
-	const std::string object12PathInputBoundingBox = inputFolder + "/obj12/*.txt";
-
-	const std::string object12PathInputImage = inputFolder + "/obj12/*.png";
-
-
-	const std::string outputPointCloudFolder = mainFolder + "/Outputs";
+	const std::string inputMergeFolder = mainMergeFolder + "/Inputs";
+	const std::string object12PathInputBoundingBox_h = inputMergeFolder + "/obj13_h/*.txt";
+	const std::string object12PathInputBoundingBox_v = inputMergeFolder + "/obj13_v/*.txt";
+	const std::string outputPointCloudFolder = mainMergeFolder + "/Outputs";
 	const std::string shape0PathOutput = outputPointCloudFolder + "/shape_0";
 	const std::string shape1PathOutput = outputPointCloudFolder + "/shape_1";
 
-	const std::string debugFolder = mainFolder + "/Debugs";
+	const std::string debugMergeFolder = mainMergeFolder + "/Debugs";
+
+
+	const std::string mainRawImageFolder = "D:/DATA/Research/DrNhu/ProjectSolutionFolder/datasetGeneration";
+	const std::string inputRawImageFolder = mainRawImageFolder + "/Inputs";
+	const std::string outputFolder = mainRawImageFolder + "/Outputs";
+	const std::string debugFolder = mainRawImageFolder + "/Debugs";
+
+	const std::string object_1_path = "/object_1";
+	const std::string object_2_path = "/object_3";
+
+	const std::string object_1_depthPath = inputRawImageFolder + object_1_path + "/depth/*.png";
+	const std::string object_2_depthPath = inputRawImageFolder + object_2_path + "/depth/*.png";
 
 	/*const double intrinsic_n1[4] = { 570.31691719, 570.31988743, 314.9278689, 228.59060364 };
 	const double intrinsic_n2[4] = { 572.31327882, 572.31155976, 314.34439596, 228.35836425 };
@@ -622,8 +692,10 @@ void cutPointCloudOfDetectObjects()
 	const double intrinsic_n4[4] = { 567.62010676, 567.62984091, 311.41553264, 225.10048896 };
 	const double intrinsic_n5[4] = { 572.97665944, 572.96466485, 310.95680422, 215.36230807 };
 
-	std::vector<std::string> boundingBox12Path;
-	std::vector<std::string> depthImage12Path;
+	std::vector<std::string> boundingBox12Path_h;
+	std::vector<std::string> boundingBox12Path_v;
+	std::vector<std::string> object_1_depthFileNames;
+	std::vector<std::string> object_2_depthFileNames;
 
 	std::size_t index = 0;
 	int count = 0;
@@ -635,23 +707,24 @@ void cutPointCloudOfDetectObjects()
 
 	std::cout << "cutPointCloudOfDetectObjects::Process data: Read data" << std::endl;
 
-	cv::glob(object12PathInputBoundingBox, boundingBox12Path);
-	cv::glob(object12PathInputImage, depthImage12Path);
+	cv::glob(object12PathInputBoundingBox_h, boundingBox12Path_h);
+	cv::glob(object12PathInputBoundingBox_v, boundingBox12Path_v);
+	cv::glob(object_1_depthPath, object_1_depthFileNames);
+	cv::glob(object_2_depthPath, object_2_depthFileNames);
 
-	std::sort(boundingBox12Path.begin(), boundingBox12Path.end(), naturalSorting);
-	std::sort(depthImage12Path.begin(), depthImage12Path.end(), naturalSorting);
+	std::sort(boundingBox12Path_h.begin(), boundingBox12Path_h.end(), naturalSorting);
+	std::sort(boundingBox12Path_v.begin(), boundingBox12Path_v.end(), naturalSorting);
 
+	std::sort(object_1_depthFileNames.begin(), object_1_depthFileNames.end(), naturalSorting);
+	std::sort(object_2_depthFileNames.begin(), object_2_depthFileNames.end(), naturalSorting);
 
 	std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " << std::endl;
-	for (auto const& f : depthImage12Path)
+	for (auto const& f : boundingBox12Path_h)
 	{
-		nameBoundingBoxFile = boundingBox12Path[index];
+		nameBoundingBoxFile = boundingBox12Path_h[index];
 		eraseSubStrings(nameBoundingBoxFile, toEraseTXT);
 
-		nameDepthImageFile = depthImage12Path[index];
-		eraseSubStrings(nameDepthImageFile, toErasePNG);
-
-		std::string nameFile = nameDepthImageFile.substr(nameDepthImageFile.find("\\") + 1);
+		std::string nameFile = nameBoundingBoxFile.substr(nameBoundingBoxFile.find("\\") + 1);
 
 		/* Read bounding box coordinate*/
 		std::ifstream inputfile(nameBoundingBoxFile + ".txt");
@@ -667,198 +740,477 @@ void cutPointCloudOfDetectObjects()
 				inputfile >> boundingArr[r][c];
 			}
 		}
-		cv::Mat depth_img = cv::imread(depthImage12Path[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-
 
 		/* Check merge is horizontal or vertical*/
+		nameBoundingBoxFile = boundingBox12Path_h[index];
+		eraseSubStrings(nameBoundingBoxFile, toEraseTXT);
+		std::string nameDepthImgCropped = nameBoundingBoxFile.substr(nameBoundingBoxFile.find("\\") + 1).substr(0, nameBoundingBoxFile.substr(nameBoundingBoxFile.find("\\") + 1).find("1_merge_"));
+
 		for (int r = 0; r < 2; r++)
 		{
-			nameDepthImageFile = depthImage12Path[index];
-			eraseSubStrings(nameDepthImageFile, toErasePNG);
+			boundingArr[r][1] *= 2560;
+			boundingArr[r][2] *= 1024;
+			boundingArr[r][3] *= 2560;
+			boundingArr[r][4] *= 1024;
 
-			std::string nameDepthImgCropped = nameDepthImageFile.substr(nameDepthImageFile.find("\\") + 1).substr(0, nameDepthImageFile.substr(nameDepthImageFile.find("\\") + 1).find("1_merge_"));
+			boundingArr[r][1] = boundingArr[r][1] - boundingArr[r][3] / 2;
+			boundingArr[r][2] = boundingArr[r][2] - boundingArr[r][4] / 2;
+			boundingArr[r][3] = boundingArr[r][1] + boundingArr[r][3];
+			boundingArr[r][4] = boundingArr[r][2] + boundingArr[r][4];
 
-			if (nameDepthImageFile.back() == 'h')
+			boundingArr[r][1] = (boundingArr[r][1] / 2560 * 1280) + 10;
+			boundingArr[r][2] = (boundingArr[r][2] / 1024 * 480);
+			boundingArr[r][3] = (boundingArr[r][3] / 2560 * 1280) + 20;
+			boundingArr[r][4] = (boundingArr[r][4] / 1024 * 480) + 20;
+
+			if (boundingArr[r][1] > 640 || boundingArr[r][3] > 640)
 			{
-				boundingArr[r][1] *= 2560;
-				boundingArr[r][2] *= 1024;
-				boundingArr[r][3] *= 2560;
-				boundingArr[r][4] *= 1024;
+				boundingArr[r][1] -= 640;
+				boundingArr[r][3] -= 640;
+			}
 
-				boundingArr[r][1] = boundingArr[r][1] - boundingArr[r][3] / 2;
-				boundingArr[r][2] = boundingArr[r][2] - boundingArr[r][4] / 2;
-				boundingArr[r][3] = boundingArr[r][1] + boundingArr[r][3];
-				boundingArr[r][4] = boundingArr[r][2] + boundingArr[r][4];
-
-				boundingArr[r][1] = (boundingArr[r][1] / 2560 * 1280) + 10;
-				boundingArr[r][2] = (boundingArr[r][2] / 1024 * 480);
-				boundingArr[r][3] = (boundingArr[r][3] / 2560 * 1280) + 10;
-				boundingArr[r][4] = (boundingArr[r][4] / 1024 * 480) + 10;
-
-				cv::Mat croppedImg;
-				depth_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg);
-
-				if (boundingArr[r][0] == 0) 
+			if (boundingArr[r][0] == 0)
+			{
+				if (nameDepthImgCropped.substr(0, 3) == "NP1")
 				{
-					if (nameDepthImgCropped.substr(0, 3) == "NP1")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n1);
-						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP2")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n2);
-						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP3")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n3);
-						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP4")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n4);
-						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP5")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n5);
-						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
-					}
+					cv::Mat obj_1_img = cv::imread(object_1_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_1;
+					obj_1_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_1);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_1, intrinsic_n1);
+					pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
 				}
-
-				if (boundingArr[r][0] == 1) 
+				else if (nameDepthImgCropped.substr(0, 3) == "NP2")
 				{
-					if (nameDepthImgCropped.substr(0, 3) == "NP1")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n1);
-						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP2")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n2);
-						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP3")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n3);
-						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP4")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n4);
-						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP5")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n5);
-						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
-					}
+					cv::Mat obj_1_img = cv::imread(object_1_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_1;
+					obj_1_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_1);
 
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_1, intrinsic_n2);
+					pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP3")
+				{
+					cv::Mat obj_1_img = cv::imread(object_1_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_1;
+					obj_1_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_1);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_1, intrinsic_n3);
+					pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP4")
+				{
+					cv::Mat obj_1_img = cv::imread(object_1_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_1;
+					obj_1_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_1);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_1, intrinsic_n4);
+					pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP5")
+				{
+					cv::Mat obj_1_img = cv::imread(object_1_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_1;
+					obj_1_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_1);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_1, intrinsic_n5);
+					pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_h.ply" << std::endl;
 				}
 			}
-			else if (nameDepthImageFile.back() == 'v')
+
+			else if (boundingArr[r][0] == 1)
 			{
-				boundingArr[r][1] *= 1280;
-				boundingArr[r][2] *= 2048;
-				boundingArr[r][3] *= 1280;
-				boundingArr[r][4] *= 2048;
-
-				boundingArr[r][1] = boundingArr[r][1] - boundingArr[r][3] / 2;
-				boundingArr[r][2] = boundingArr[r][2] - boundingArr[r][4] / 2;
-				boundingArr[r][3] = boundingArr[r][1] + boundingArr[r][3];
-				boundingArr[r][4] = boundingArr[r][2] + boundingArr[r][4];
-
-				boundingArr[r][1] = (boundingArr[r][1] / 1280 * 640) + 10;
-				boundingArr[r][2] = (boundingArr[r][2] / 2048 * 960);
-				boundingArr[r][3] = (boundingArr[r][3] / 1280 * 640) + 10;
-				boundingArr[r][4] = (boundingArr[r][4] / 2048 * 960) + 10;
-
-				cv::Mat croppedImg;
-				depth_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg);
-
-				if (boundingArr[r][0] == 0)
+				if (nameDepthImgCropped.substr(0, 3) == "NP1")
 				{
-					if (nameDepthImgCropped.substr(0, 3) == "NP1")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n1);
-						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP2")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n2);
-						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP3")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n3);
-						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP4")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n4);
-						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP5")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n5);
-						pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
-					}
+					cv::Mat obj_2_img = cv::imread(object_2_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_2;
+					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n1);
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply" << std::endl;
 				}
-
-				if (boundingArr[r][0] == 1)
+				else if (nameDepthImgCropped.substr(0, 3) == "NP2")
 				{
-					if (nameDepthImgCropped.substr(0, 3) == "NP1")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n1);
-						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP2")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n2);
-						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP3")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n3);
-						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP4")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n4);
-						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
-					}
-					else if (nameDepthImgCropped.substr(0, 3) == "NP5")
-					{
-						pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg, intrinsic_n5);
-						pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
-						std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
-					}
+					cv::Mat obj_2_img = cv::imread(object_2_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_2;
+					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n2);
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP3")
+				{
+					cv::Mat obj_2_img = cv::imread(object_2_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_2;
+					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n3);
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP4")
+				{
+					cv::Mat obj_2_img = cv::imread(object_2_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_2;
+					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n4);
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP5")
+				{
+					cv::Mat obj_2_img = cv::imread(object_2_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_2;
+					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n5);
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply" << std::endl;
+				}
+			}
+		}	
+		index++;
+	}
+
+	index = 0;
+
+	for (auto const& f : boundingBox12Path_v)
+	{
+		nameBoundingBoxFile = boundingBox12Path_v[index];
+		eraseSubStrings(nameBoundingBoxFile, toEraseTXT);
+
+		std::string nameFile = nameBoundingBoxFile.substr(nameBoundingBoxFile.find("\\") + 1);
+
+		/* Read bounding box coordinate*/
+		std::ifstream inputfile(nameBoundingBoxFile + ".txt");
+		double boundingArr[2][5];
+		if (!inputfile.is_open())
+		{
+			std::cout << "Error opening file";
+		}
+		for (int r = 0; r < 2; r++)
+		{
+			for (int c = 0; c < 5; c++)
+			{
+				inputfile >> boundingArr[r][c];
+			}
+		}
+
+		/* Check merge is horizontal or vertical*/
+		nameBoundingBoxFile = boundingBox12Path_v[index];
+		eraseSubStrings(nameBoundingBoxFile, toEraseTXT);
+		std::string nameDepthImgCropped = nameBoundingBoxFile.substr(nameBoundingBoxFile.find("\\") + 1).substr(0, nameBoundingBoxFile.substr(nameBoundingBoxFile.find("\\") + 1).find("1_merge_"));
+
+		for (int r = 0; r < 2; r++)
+		{
+			boundingArr[r][1] *= 1280;
+			boundingArr[r][2] *= 2048;
+			boundingArr[r][3] *= 1280;
+			boundingArr[r][4] *= 2048;
+
+			boundingArr[r][1] = boundingArr[r][1] - boundingArr[r][3] / 2;
+			boundingArr[r][2] = boundingArr[r][2] - boundingArr[r][4] / 2;
+			boundingArr[r][3] = boundingArr[r][1] + boundingArr[r][3];
+			boundingArr[r][4] = boundingArr[r][2] + boundingArr[r][4];
+
+			boundingArr[r][1] = (boundingArr[r][1] / 1280 * 640) + 10;
+			boundingArr[r][2] = (boundingArr[r][2] / 2048 * 960);
+			boundingArr[r][3] = (boundingArr[r][3] / 1280 * 640) + 20;
+			boundingArr[r][4] = (boundingArr[r][4] / 2048 * 960) + 20;
+
+			if (boundingArr[r][2] > 480 || boundingArr[r][4] > 480)
+			{
+				boundingArr[r][2] -= 480;
+				boundingArr[r][4] -= 480;
+			}
+
+			if (boundingArr[r][0] == 0)
+			{
+				if (nameDepthImgCropped.substr(0, 3) == "NP1")
+				{
+					cv::Mat obj_1_img = cv::imread(object_1_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_1;
+					obj_1_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_1);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_1, intrinsic_n1);
+					pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP2")
+				{
+					cv::Mat obj_1_img = cv::imread(object_1_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_1;
+					obj_1_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_1);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_1, intrinsic_n2);
+					pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP3")
+				{
+					cv::Mat obj_1_img = cv::imread(object_1_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_1;
+					obj_1_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_1);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_1, intrinsic_n3);
+					pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP4")
+				{
+					cv::Mat obj_1_img = cv::imread(object_1_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_1;
+					obj_1_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_1);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_1, intrinsic_n4);
+					pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP5")
+				{
+					cv::Mat obj_1_img = cv::imread(object_1_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_1;
+					obj_1_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_1);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_1, intrinsic_n5);
+					pcl::io::savePLYFileBinary(shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "1_shape0_v.ply" << std::endl;
+				}
+			}
+
+			else if (boundingArr[r][0] == 1)
+			{
+				if (nameDepthImgCropped.substr(0, 3) == "NP1")
+				{
+					cv::Mat obj_2_img = cv::imread(object_2_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_2;
+					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n1);
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP2")
+				{
+					cv::Mat obj_2_img = cv::imread(object_2_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_2;
+					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n2);
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP3")
+				{
+					cv::Mat obj_2_img = cv::imread(object_2_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_2;
+					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n3);
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP4")
+				{
+					cv::Mat obj_2_img = cv::imread(object_2_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_2;
+					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n4);
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply" << std::endl;
+				}
+				else if (nameDepthImgCropped.substr(0, 3) == "NP5")
+				{
+					cv::Mat obj_2_img = cv::imread(object_2_depthFileNames[index], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+					cv::Mat croppedImg_obj_2;
+					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
+
+					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n5);
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply" << std::endl;
 				}
 			}
 		}
 		index++;
 	}
+	std::cout << "cutPointCloudOfDetectObjects:: Finalizing" << std::endl;
+
 }
+
+void mergePointClouds()
+{
+	std::cout << "mergePointClouds:: Initialization" << std::endl;
+
+	std::string mainFolder = "D:/DATA/Research/DrNhu/ProjectSolutionFolder/mergePointClouds";
+	std::string inputFolder = mainFolder + "/Inputs";
+	std::string outputFolder = mainFolder + "/Outputs";
+	std::string debugFolder = mainFolder + "/Debugs";
+
+	std::string pointCloudFile = inputFolder + "/*.ply";
+	std::string test_pc_1 = debugFolder + "/NP1_0_obj1_shape0_v.ply";
+	std::string test_pc_5 = debugFolder + "/NP5_0_obj1_shape0_v.ply";
+
+	std::vector<std::string> pointCloudFilenames;
+
+	cv::glob(pointCloudFile, pointCloudFilenames);
+	std::sort(pointCloudFilenames.begin(), pointCloudFilenames.end(), naturalSorting);
+
+	std::size_t index = 0;
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr outPointCloud(new pcl::PointCloud<pcl::PointXYZ>());
+
+	Eigen::Matrix4f NP1_to_NP5;
+	NP1_to_NP5 << 0.99875184, 0.04598368, -0.0195003, -0.02709601,
+		0.02167112, -0.04719246, 0.99865071, -0.83099701,
+		0.04500137, -0.99782683, -0.04813008, 0.71722502,
+		0, 0, 0, 1;
+
+	Eigen::Matrix4f NP2_to_NP5;
+	NP2_to_NP5 << 0.9985719, 0.00921411, -0.05262385, 0.01507933,
+		0.04437823, 0.40535598, 0.9130811, -0.77583786,
+		0.02974462, -0.91411248, 0.40436819, 0.38050523,
+		0, 0, 0, 1;
+
+	Eigen::Matrix4f NP3_to_NP5;
+	NP3_to_NP5 << 0.99896093, -0.00136228, -0.04555447, -0.01276135,
+		0.03174108, 0.73807073, 0.67397634, -0.56863481,
+		0.03270428, -0.67472197, 0.73734706, 0.12832145,
+		0, 0, 0, 1;
+
+	Eigen::Matrix4f NP4_to_NP5;
+	NP4_to_NP5 << 0.99905032, -0.01838068, -0.03950454, 0.00301888,
+		0.03303548, 0.91071428, 0.41171368, -0.27772411,
+		0.02840977, -0.41262774, 0.91045661, 0.03794943,
+		0, 0, 0, 1;
+
+	Eigen::Matrix4f NP5_to_NP5 = Eigen::Matrix4f::Identity();
+	/*NP5_to_NP5 << -0.10236438, -0.99210449, -0.07245836, 0.02107357,
+		-0.99472137, 0.10156727, 0.01461105, 0.03693756,
+		-0.00713629, 0.07357153, -0.99726441, 0.97146488,
+		0, 0, 0, 1;*/
+
+
+	/*std::cout << "mergePointClouds:: Processing" << std::endl;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_2(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZ>::Ptr trans_cloud_1(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZ>::Ptr trans_cloud_5(new pcl::PointCloud<pcl::PointXYZ>());
+
+	pcl::io::loadPLYFile(test_pc_1, *cloud_1);
+	pcl::io::loadPLYFile(test_pc_5, *cloud_2);
+	pcl::transformPointCloud(*cloud_1, *trans_cloud_1, NP1_to_NP5);
+	pcl::io::savePLYFile(outputFolder + "/test_coor.ply", *trans_cloud_1 + *cloud_2);*/
+
+	for (auto const& f : pointCloudFilenames)
+	{
+
+		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
+		pcl::io::loadPLYFile(pointCloudFilenames[index], *cloud);
+
+		if (checkSubString(pointCloudFilenames[index], "NP1"))
+		{
+			pcl::transformPointCloud(*cloud, *cloud, NP1_to_NP5);
+
+			Eigen::MatrixXd outPoints;
+			const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(cloud);
+			Eigen::MatrixXd targetVertical = cloudMatrix;
+			Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
+			Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
+			Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
+
+			int heightOutpoints = cloud->height;
+			int widthtOutpoints = cloud->width;
+			*outPointCloud += convertEigenMatrixXdToPCLCloud(outPoints, heightOutpoints, widthtOutpoints);
+			std::cout << "mergePointClouds:: Processing: " << pointCloudFilenames[index] << std::endl;
+
+		}
+
+		else if (checkSubString(pointCloudFilenames[index], "NP2"))
+		{
+			pcl::transformPointCloud(*cloud, *cloud, NP2_to_NP5);
+
+			Eigen::MatrixXd outPoints;
+			const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(cloud);
+			Eigen::MatrixXd targetVertical = cloudMatrix;
+			Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
+			Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
+			Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
+
+			int heightOutpoints = cloud->height;
+			int widthtOutpoints = cloud->width;
+			*outPointCloud += convertEigenMatrixXdToPCLCloud(outPoints, heightOutpoints, widthtOutpoints);
+			std::cout << "mergePointClouds:: Processing: " << pointCloudFilenames[index] << std::endl;
+
+		}
+
+		else if (checkSubString(pointCloudFilenames[index], "NP3"))
+		{
+			pcl::transformPointCloud(*cloud, *cloud, NP3_to_NP5);
+
+			Eigen::MatrixXd outPoints;
+			const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(cloud);
+			Eigen::MatrixXd targetVertical = cloudMatrix;
+			Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
+			Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
+			Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
+
+			int heightOutpoints = cloud->height;
+			int widthtOutpoints = cloud->width;
+			*outPointCloud += convertEigenMatrixXdToPCLCloud(outPoints, heightOutpoints, widthtOutpoints);
+			std::cout << "mergePointClouds:: Processing: " << pointCloudFilenames[index] << std::endl;
+
+		}
+
+		else if (checkSubString(pointCloudFilenames[index], "NP4"))
+		{
+			pcl::transformPointCloud(*cloud, *cloud, NP4_to_NP5);
+
+			Eigen::MatrixXd outPoints;
+			const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(cloud);
+			Eigen::MatrixXd targetVertical = cloudMatrix;
+			Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
+			Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
+			Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
+
+			int heightOutpoints = cloud->height;
+			int widthtOutpoints = cloud->width;
+			*outPointCloud += convertEigenMatrixXdToPCLCloud(outPoints, heightOutpoints, widthtOutpoints);
+			std::cout << "mergePointClouds:: Processing: " << pointCloudFilenames[index] << std::endl;
+
+		}
+
+		else if (checkSubString(pointCloudFilenames[index], "NP5"))
+		{
+			pcl::transformPointCloud(*cloud, *cloud, NP5_to_NP5);
+
+			Eigen::MatrixXd outPoints;
+			const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(cloud);
+			Eigen::MatrixXd targetVertical = cloudMatrix;
+			Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
+			Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
+			Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
+
+			int heightOutpoints = cloud->height;
+			int widthtOutpoints = cloud->width;
+			*outPointCloud += convertEigenMatrixXdToPCLCloud(outPoints, heightOutpoints, widthtOutpoints);
+			std::cout << "mergePointClouds:: Processing: " << pointCloudFilenames[index] << std::endl;
+
+		}
+		index++;
+	}
+	pcl::io::savePLYFile(outputFolder + "/test_transform_to_root.ply", *outPointCloud);
+}
+
+
 
 /*-----------MAIN FUNCTIONS-----------*/
 
@@ -872,8 +1224,9 @@ void mainFunction()
 
 	/*Process data*/
 	std::cout << "mainFunction:: Process data" << std::endl;
-	
-	cutPointCloudOfDetectObjects();
+	/*datasetGeneration();*/
+	/*cutPointCloudOfDetectObjects();*/
+	mergePointClouds();
 	/*Finalizing*/
 	std::cout << "mainFunction:: Finalizing" << std::endl;
 }

@@ -31,11 +31,11 @@
     <Filter Include="Source Files\extractPointCloudFromBoundingBox">
       <UniqueIdentifier>{6a173100-d176-47b2-aa81-ca34e54f7875}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\test_math">
-      <UniqueIdentifier>{b9d77766-453f-4013-b012-081d2decb530}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\trainingFolder">
       <UniqueIdentifier>{5466449e-03bc-449e-8ce2-cd09f19d99b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\testFunc">
+      <UniqueIdentifier>{f6e211ba-0217-42f2-8a34-4b94737f8ddf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -64,14 +64,14 @@
     <ClCompile Include="test_ICP.cpp">
       <Filter>Source Files\AnotherGeneratePointCloud</Filter>
     </ClCompile>
-    <ClCompile Include="test_math.cpp">
-      <Filter>Source Files\test_math</Filter>
-    </ClCompile>
     <ClCompile Include="transformToOriginalPoints.cpp">
       <Filter>Source Files\trainingFolder</Filter>
     </ClCompile>
     <ClCompile Include="MultipleObjectScanning.cpp">
       <Filter>Source Files\trainingFolder</Filter>
+    </ClCompile>
+    <ClCompile Include="splitImage.cpp">
+      <Filter>Source Files\testFunc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -96,14 +96,14 @@
     <ClInclude Include="test_ICP.h">
       <Filter>Source Files\AnotherGeneratePointCloud</Filter>
     </ClInclude>
-    <ClInclude Include="test_math.h">
-      <Filter>Source Files\test_math</Filter>
-    </ClInclude>
     <ClInclude Include="transformToOriginalPoints.h">
       <Filter>Source Files\trainingFolder</Filter>
     </ClInclude>
     <ClInclude Include="MultipleObjectScanning.h">
       <Filter>Source Files\trainingFolder</Filter>
+    </ClInclude>
+    <ClInclude Include="splitImage.h">
+      <Filter>Source Files\testFunc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
