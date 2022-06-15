@@ -236,15 +236,13 @@ void cropAndCreatePointCloud(std::string boundingBoxPath, std::string depthPath,
 	}	
 }
 
-pcl::PointCloud<pcl::PointXYZ> convertEigenMatrixXdToPCLCloud(const Eigen::MatrixXd& inputMatrix, int height, int width)
+pcl::PointCloud<pcl::PointXYZ> convertEigenMatrixXdToPCLCloud(const Eigen::MatrixXd& inputMatrix)
 {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr outputCloud(new pcl::PointCloud<pcl::PointXYZ>());
 	outputCloud->points.resize(inputMatrix.rows());
-	/*outputCloud->height = inputMatrix.rows();
-	outputCloud->width = 3;*/
 
-	outputCloud->height = height;
-	outputCloud->width = width;
+	outputCloud->height = 1;
+	outputCloud->width = inputMatrix.rows();
 
 	for (unsigned int i = 0; i < outputCloud->points.size(); i++) {
 		pcl::PointXYZ point;
@@ -261,13 +259,23 @@ Eigen::MatrixXd convertPCLCloudToEigenMatrixXd(const pcl::PointCloud<pcl::PointX
 	Eigen::MatrixXd outputBuffer(inputCloud->points.size(), 3);
 	for (unsigned int i = 0; i < outputBuffer.rows(); i++) {
 		Eigen::RowVector3d point = Eigen::RowVector3d(inputCloud->points[i].x, inputCloud->points[i].y, inputCloud->points[i].z);
-		outputBuffer.row(i) = point / 1000.0;
+		outputBuffer.row(i) = point;
 	}
 	return outputBuffer;
 }
 
-Eigen::Matrix4f transformVerticesFromPointToPoint(const Eigen::MatrixXd& targetVertices,
-	const Eigen::Vector3d fromPoint, const Eigen::Vector3d toPoint, Eigen::MatrixXd& outPoints)
+Eigen::MatrixXd transformPointsWithTransformMatrix(const Eigen::MatrixXd& inputVertices, const Eigen::Matrix4f& transformMatrix)
+{
+	pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZ>::Ptr transformedCloud(new pcl::PointCloud<pcl::PointXYZ>());
+	Eigen::MatrixXd outputMatrix;
+	*sourceCloud = convertEigenMatrixXdToPCLCloud(inputVertices);
+	pcl::transformPointCloud(*sourceCloud, *transformedCloud, transformMatrix);
+	outputMatrix = convertPCLCloudToEigenMatrixXd(transformedCloud);
+	return outputMatrix;
+}
+
+Eigen::Matrix4f transformVerticesFromPointToPoint(const Eigen::MatrixXd& targetVertices, const Eigen::Vector3d fromPoint, const Eigen::Vector3d toPoint, Eigen::MatrixXd& outPoints)
 {
 	Eigen::MatrixXd outputBuffer;
 	Eigen::Vector3d diffVector = (toPoint - fromPoint);
@@ -278,16 +286,23 @@ Eigen::Matrix4f transformVerticesFromPointToPoint(const Eigen::MatrixXd& targetV
 	return transform;
 }
 
-Eigen::MatrixXd transformPointsWithTransformMatrix(const Eigen::MatrixXd inputVertices, const Eigen::Matrix4f transformMatrix)
-{
-	pcl::PointCloud<pcl::PointXYZ>::Ptr sourceCloud(new pcl::PointCloud<pcl::PointXYZ>());
-	pcl::PointCloud<pcl::PointXYZ>::Ptr transformedCloud(new pcl::PointCloud<pcl::PointXYZ>());
-	Eigen::MatrixXd outputMatrix;
 
-	*sourceCloud = convertEigenMatrixXdToPCLCloud(inputVertices, 4413, 3);
-	pcl::transformPointCloud(*sourceCloud, *transformedCloud, transformMatrix);
-	outputMatrix = convertPCLCloudToEigenMatrixXd(transformedCloud);
-	return outputMatrix;
+
+void transformPointCloudToOriginal(pcl::PointCloud<pcl::PointXYZ>::Ptr& inCloud, pcl::PointCloud<pcl::PointXYZ>::Ptr& outCloud) 
+{
+	const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(inCloud);
+	std::cout << "Initial targetVertical --------------------" << std::endl;
+	Eigen::MatrixXd targetVertical = cloudMatrix;
+	std::cout << "Initial fromPoints --------------------" << std::endl;
+	Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
+	std::cout << "Initial toPoints --------------------" << std::endl;
+	Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
+	std::cout << "Initial outPoints --------------------" << std::endl;
+	Eigen::MatrixXd outPoints;
+	std::cout << "Calculate transformation matrix ---------------" << std::endl;
+	Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
+
+	*outCloud = convertEigenMatrixXdToPCLCloud(outPoints);
 }
 
 /*-----------MAIN PROCESSING FUNCTIONS-----------*/
@@ -1055,8 +1070,9 @@ void mergePointClouds()
 	std::string outputFolder = mainFolder + "/Outputs";
 	std::string debugFolder = mainFolder + "/Debugs";
 
-	std::string pathDepth_1 = debugFolder + "/NP1_0.png";
-	std::string pathDepth_5 = debugFolder + "/NP5_0.png";
+	std::string pathDepth_1 = debugFolder + "/NP1_0_obj1_shape0_v.ply";
+	std::string pathDepth_5 = debugFolder + "/NP5_0_obj1_shape0_v.ply";
+	std::string pathDepth_192 = debugFolder + "/NP1_192_obj1_shape0_v.ply";
 
 	const double intrinsic_n1[4] = { 571.15928878, 571.16352329, 311.07448762, 233.73421022 };
 	const double intrinsic_n2[4] = { 572.19350868, 572.19147096, 311.08874623, 228.22643626 };
@@ -1064,11 +1080,20 @@ void mergePointClouds()
 	const double intrinsic_n4[4] = { 567.62010676, 567.62984091, 311.41553264, 225.10048896 };
 	const double intrinsic_n5[4] = { 572.97665944, 572.96466485, 310.95680422, 215.36230807 };
 
-	cv::Mat depth_1 = cv::imread(pathDepth_1, cv::IMREAD_ANYDEPTH | cv::IMREAD_ANYCOLOR);
+	/*cv::Mat depth_1 = cv::imread(pathDepth_1, cv::IMREAD_ANYDEPTH | cv::IMREAD_ANYCOLOR);
 	cv::Mat depth_5 = cv::imread(pathDepth_5, cv::IMREAD_ANYDEPTH | cv::IMREAD_ANYCOLOR);
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1 = createPointCloud(depth_1, intrinsic_n1);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5 = createPointCloud(depth_5, intrinsic_n5);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5 = createPointCloud(depth_5, intrinsic_n5);*/
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_192(new pcl::PointCloud<pcl::PointXYZ>);
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr finalCloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+	pcl::io::loadPLYFile(pathDepth_1, *cloud_1);
+	pcl::io::loadPLYFile(pathDepth_5, *cloud_5);
+	pcl::io::loadPLYFile(pathDepth_192, *cloud_192);
 
 	Eigen::Matrix4f NP1_NP5;
 	NP1_NP5 << 0.99875184, 0.04598368, -0.0195003, -0.02709601,
@@ -1088,50 +1113,40 @@ void mergePointClouds()
 		-1.27647941e-02, -2.04900042e-02, 9.99708567e-01, 2.09527401e-02,
 		0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00;
 
-	Eigen::Matrix4f H_table_NP5;
-	H_table_NP5 << -0.10236438, -0.99210449, -0.07245836, 0.02107357,
+	Eigen::Matrix4f H_table_NP5_1;
+	H_table_NP5_1 << -0.10236438, -0.99210449, -0.07245836, 0.02107357,
 		-0.99472137, 0.10156727, 0.01461105, 0.03693756,
 		-0.00713629, 0.07357153, -0.99726441, 0.97146488,
 		0., 0., 0., 1.;
 
-	float rotVec_f[3] = {1.12134991642377, 1.38173224253792, -1.33534397738671};
-	float transVec_f[3] = {-0.0883353573265292, 0.135121681499141, 0.640126680231481};
-	float ide_vec[4] = { 0,0,0,1 };
-
-	float cam_vec[9] = {
-		571.15928878,0,311.07448762,
-		0, 571.16352329, 233.73421022,
-		0,0,1 };
-	cv::Mat camMat(3, 3, CV_32F, cam_vec);
-
-	cv::Mat rotVec = cv::Mat(1, 3, CV_32F, rotVec_f);
-	cv::Mat transVec = cv::Mat(3, 1, CV_32F, transVec_f);
-	cv::Mat identity = cv::Mat(1, 4, CV_32F, ide_vec);
-
-	cv::Mat rotMat(3, 3, CV_64F), rotTransMat(3, 4, CV_64F); 
-	cv::Mat transformMatrix_rv(4, 4, CV_64F);
-	cv::Rodrigues(rotVec, rotMat);
-	cv::hconcat(rotMat, transVec, rotTransMat);
-	cv::Mat transMat_rv = camMat * rotTransMat;
-	cv::vconcat(transMat_rv, identity, transformMatrix_rv);
-
-	Eigen::Matrix4f test_trans_mat;
-	test_trans_mat << transformMatrix_rv.at<float>(0, 0), transformMatrix_rv.at<float>(0, 1), transformMatrix_rv.at<float>(0, 2), transformMatrix_rv.at<float>(0, 3),
-		transformMatrix_rv.at<float>(1, 0), transformMatrix_rv.at<float>(1, 1), transformMatrix_rv.at<float>(1, 2), transformMatrix_rv.at<float>(1, 3),
-		transformMatrix_rv.at<float>(2, 0), transformMatrix_rv.at<float>(2, 1), transformMatrix_rv.at<float>(2, 2), transformMatrix_rv.at<float>(2, 3),
-		transformMatrix_rv.at<float>(3, 0), transformMatrix_rv.at<float>(3, 1), transformMatrix_rv.at<float>(3, 2), transformMatrix_rv.at<float>(3, 3);
+	Eigen::Matrix4f H_table_NP5_192;
+	H_table_NP5_192 << -1.06399879e-01, 9.91572358e-01, 7.39143091e-02, -1.29524560e-02,
+		9.94297810e-01, 1.06636295e-01, 7.51741119e-04, -4.05050915e-02,
+		-7.13654233e-03, 7.35728209e-02, -9.97264313e-01, 9.71464883e-01,
+		0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00;
 	
-	std::cout << test_trans_mat << std::endl;
+	pcl::transformPointCloud(*cloud_1, *cloud_1, N1_NP5.inverse());
+	pcl::transformPointCloud(*cloud_1, *cloud_1, H_table_NP5_1);
+
+	pcl::transformPointCloud(*cloud_192, *cloud_192, N1_NP5.inverse());
+	pcl::transformPointCloud(*cloud_192, *cloud_192, H_table_NP5_192);
+
+	pcl::transformPointCloud(*cloud_5, *cloud_5, N5_NP5.inverse());
+	pcl::transformPointCloud(*cloud_5, *cloud_5, H_table_NP5_1);
+
+	/*transformPointCloudToOriginal(cloud_1, cloud_1);
+	transformPointCloudToOriginal(cloud_5, cloud_5);
+	transformPointCloudToOriginal(cloud_192, cloud_192);*/
 	
+	pcl::io::savePLYFile(outputFolder + "/cloud_1.ply", *cloud_1);
+	pcl::io::savePLYFile(outputFolder + "/cloud_5.ply", *cloud_5);
+	pcl::io::savePLYFile(outputFolder + "/cloud_192.ply", *cloud_192);
 
-	pcl::transformPointCloud(*cloud_1, *cloud_1, NP1_NP5);
-	pcl::transformPointCloud(*cloud_1, *cloud_1, test_trans_mat);
-	pcl::transformPointCloud(*cloud_5, *cloud_5, NP5_NP5);
-	/*pcl::transformPointCloud(*cloud_1, *cloud_1, H_table_NP5);
-	pcl::transformPointCloud(*cloud_5, *cloud_5, H_table_NP5);*/
+	*finalCloud = *cloud_1 + *cloud_5 + *cloud_192;
+	transformPointCloudToOriginal(finalCloud, finalCloud);
 
-	pcl::io::savePLYFile(outputFolder + "/np15.ply", *cloud_1);
-
+	pcl::io::savePLYFile(outputFolder + "/cloud15192.ply", *finalCloud);
+	
 	std::cout << "mergePointClouds:: Finalizing" << std::endl;
 
 }

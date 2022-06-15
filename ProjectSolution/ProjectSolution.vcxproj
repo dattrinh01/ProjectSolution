@@ -153,7 +153,6 @@
     <ClCompile Include="splitImage.cpp" />
     <ClCompile Include="test_genPCMethod.cpp" />
     <ClCompile Include="test_ICP.cpp" />
-    <ClCompile Include="transformToOriginalPoints.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="calibration.h" />
@@ -165,7 +164,6 @@
     <ClInclude Include="splitImage.h" />
     <ClInclude Include="test_genPCMethod.h" />
     <ClInclude Include="test_ICP.h" />
-    <ClInclude Include="transformToOriginalPoints.h" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="in_VID5.xml" />

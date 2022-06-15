@@ -64,9 +64,6 @@
     <ClCompile Include="test_ICP.cpp">
       <Filter>Source Files\AnotherGeneratePointCloud</Filter>
     </ClCompile>
-    <ClCompile Include="transformToOriginalPoints.cpp">
-      <Filter>Source Files\trainingFolder</Filter>
-    </ClCompile>
     <ClCompile Include="MultipleObjectScanning.cpp">
       <Filter>Source Files\trainingFolder</Filter>
     </ClCompile>
@@ -95,9 +92,6 @@
     </ClInclude>
     <ClInclude Include="test_ICP.h">
       <Filter>Source Files\AnotherGeneratePointCloud</Filter>
-    </ClInclude>
-    <ClInclude Include="transformToOriginalPoints.h">
-      <Filter>Source Files\trainingFolder</Filter>
     </ClInclude>
     <ClInclude Include="MultipleObjectScanning.h">
       <Filter>Source Files\trainingFolder</Filter>
