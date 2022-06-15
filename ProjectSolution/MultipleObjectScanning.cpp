@@ -651,7 +651,7 @@ void cutPointCloudOfDetectObjects()
 
 
 	/*
-	Replace 2_shape1 to 3_shape1
+	Replace 3_shape1 to 2_shape1
 	Replace /obj12_h and /obj12_v to /obj13_h and /obj13_v
 	Replace const std::string object_2_path = "/object_2" to const std::string object_2_path = "/object_3";
 	*/
@@ -660,8 +660,8 @@ void cutPointCloudOfDetectObjects()
 	const std::string mainMergeFolder = "D:/DATA/Research/DrNhu/ProjectSolutionFolder/cutPointCloudOfDetectObjects";
 
 	const std::string inputMergeFolder = mainMergeFolder + "/Inputs";
-	const std::string object12PathInputBoundingBox_h = inputMergeFolder + "/obj13_h/*.txt";
-	const std::string object12PathInputBoundingBox_v = inputMergeFolder + "/obj13_v/*.txt";
+	const std::string object12PathInputBoundingBox_h = inputMergeFolder + "/obj12_h/*.txt";
+	const std::string object12PathInputBoundingBox_v = inputMergeFolder + "/obj12_v/*.txt";
 	const std::string outputPointCloudFolder = mainMergeFolder + "/Outputs";
 	const std::string shape0PathOutput = outputPointCloudFolder + "/shape_0";
 	const std::string shape1PathOutput = outputPointCloudFolder + "/shape_1";
@@ -675,7 +675,7 @@ void cutPointCloudOfDetectObjects()
 	const std::string debugFolder = mainRawImageFolder + "/Debugs";
 
 	const std::string object_1_path = "/object_1";
-	const std::string object_2_path = "/object_3";
+	const std::string object_2_path = "/object_2";
 
 	const std::string object_1_depthPath = inputRawImageFolder + object_1_path + "/depth/*.png";
 	const std::string object_2_depthPath = inputRawImageFolder + object_2_path + "/depth/*.png";
@@ -758,10 +758,10 @@ void cutPointCloudOfDetectObjects()
 			boundingArr[r][3] = boundingArr[r][1] + boundingArr[r][3];
 			boundingArr[r][4] = boundingArr[r][2] + boundingArr[r][4];
 
-			boundingArr[r][1] = (boundingArr[r][1] / 2560 * 1280) + 10;
+			boundingArr[r][1] = (boundingArr[r][1] / 2560 * 1280) + 0;
 			boundingArr[r][2] = (boundingArr[r][2] / 1024 * 480);
-			boundingArr[r][3] = (boundingArr[r][3] / 2560 * 1280) + 20;
-			boundingArr[r][4] = (boundingArr[r][4] / 1024 * 480) + 20;
+			boundingArr[r][3] = (boundingArr[r][3] / 2560 * 1280) + 0;
+			boundingArr[r][4] = (boundingArr[r][4] / 1024 * 480) + 0;
 
 			if (boundingArr[r][1] > 640 || boundingArr[r][3] > 640)
 			{
@@ -832,8 +832,8 @@ void cutPointCloudOfDetectObjects()
 					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
 
 					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n1);
-					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply", *cloud);
-					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply" << std::endl;
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
 				}
 				else if (nameDepthImgCropped.substr(0, 3) == "NP2")
 				{
@@ -842,8 +842,8 @@ void cutPointCloudOfDetectObjects()
 					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
 
 					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n2);
-					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply", *cloud);
-					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply" << std::endl;
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
 				}
 				else if (nameDepthImgCropped.substr(0, 3) == "NP3")
 				{
@@ -852,8 +852,8 @@ void cutPointCloudOfDetectObjects()
 					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
 
 					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n3);
-					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply", *cloud);
-					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply" << std::endl;
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
 				}
 				else if (nameDepthImgCropped.substr(0, 3) == "NP4")
 				{
@@ -862,8 +862,8 @@ void cutPointCloudOfDetectObjects()
 					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
 
 					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n4);
-					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply", *cloud);
-					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply" << std::endl;
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
 				}
 				else if (nameDepthImgCropped.substr(0, 3) == "NP5")
 				{
@@ -872,8 +872,8 @@ void cutPointCloudOfDetectObjects()
 					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
 
 					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n5);
-					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply", *cloud);
-					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_h.ply" << std::endl;
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_h.ply" << std::endl;
 				}
 			}
 		}	
@@ -921,10 +921,10 @@ void cutPointCloudOfDetectObjects()
 			boundingArr[r][3] = boundingArr[r][1] + boundingArr[r][3];
 			boundingArr[r][4] = boundingArr[r][2] + boundingArr[r][4];
 
-			boundingArr[r][1] = (boundingArr[r][1] / 1280 * 640) + 10;
+			boundingArr[r][1] = (boundingArr[r][1] / 1280 * 640) + 0;
 			boundingArr[r][2] = (boundingArr[r][2] / 2048 * 960);
-			boundingArr[r][3] = (boundingArr[r][3] / 1280 * 640) + 20;
-			boundingArr[r][4] = (boundingArr[r][4] / 2048 * 960) + 20;
+			boundingArr[r][3] = (boundingArr[r][3] / 1280 * 640) + 0;
+			boundingArr[r][4] = (boundingArr[r][4] / 2048 * 960) + 0;
 
 			if (boundingArr[r][2] > 480 || boundingArr[r][4] > 480)
 			{
@@ -995,8 +995,8 @@ void cutPointCloudOfDetectObjects()
 					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
 
 					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n1);
-					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply", *cloud);
-					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply" << std::endl;
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
 				}
 				else if (nameDepthImgCropped.substr(0, 3) == "NP2")
 				{
@@ -1005,8 +1005,8 @@ void cutPointCloudOfDetectObjects()
 					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
 
 					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n2);
-					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply", *cloud);
-					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply" << std::endl;
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
 				}
 				else if (nameDepthImgCropped.substr(0, 3) == "NP3")
 				{
@@ -1015,8 +1015,8 @@ void cutPointCloudOfDetectObjects()
 					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
 
 					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n3);
-					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply", *cloud);
-					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply" << std::endl;
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
 				}
 				else if (nameDepthImgCropped.substr(0, 3) == "NP4")
 				{
@@ -1025,8 +1025,8 @@ void cutPointCloudOfDetectObjects()
 					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
 
 					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n4);
-					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply", *cloud);
-					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply" << std::endl;
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
 				}
 				else if (nameDepthImgCropped.substr(0, 3) == "NP5")
 				{
@@ -1035,8 +1035,8 @@ void cutPointCloudOfDetectObjects()
 					obj_2_img(cv::Rect(boundingArr[r][1], boundingArr[r][2], boundingArr[r][3] - boundingArr[r][1], boundingArr[r][4] - boundingArr[r][2])).copyTo(croppedImg_obj_2);
 
 					pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = generatePointCloudFromDepthImage(croppedImg_obj_2, intrinsic_n5);
-					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply", *cloud);
-					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "3_shape1_v.ply" << std::endl;
+					pcl::io::savePLYFileBinary(shape1PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply", *cloud);
+					std::cout << "cutPointCloudOfDetectObjects:: Process data: Process object 12: " + shape0PathOutput + "/" + nameDepthImgCropped + "2_shape1_v.ply" << std::endl;
 				}
 			}
 		}
@@ -1055,159 +1055,85 @@ void mergePointClouds()
 	std::string outputFolder = mainFolder + "/Outputs";
 	std::string debugFolder = mainFolder + "/Debugs";
 
-	std::string pointCloudFile = inputFolder + "/*.ply";
-	std::string test_pc_1 = debugFolder + "/NP1_0_obj1_shape0_v.ply";
-	std::string test_pc_5 = debugFolder + "/NP5_0_obj1_shape0_v.ply";
+	std::string pathDepth_1 = debugFolder + "/NP1_0.png";
+	std::string pathDepth_5 = debugFolder + "/NP5_0.png";
 
-	std::vector<std::string> pointCloudFilenames;
+	const double intrinsic_n1[4] = { 571.15928878, 571.16352329, 311.07448762, 233.73421022 };
+	const double intrinsic_n2[4] = { 572.19350868, 572.19147096, 311.08874623, 228.22643626 };
+	const double intrinsic_n3[4] = { 569.22935734, 569.22937915, 308.72611105, 225.53660806 };
+	const double intrinsic_n4[4] = { 567.62010676, 567.62984091, 311.41553264, 225.10048896 };
+	const double intrinsic_n5[4] = { 572.97665944, 572.96466485, 310.95680422, 215.36230807 };
 
-	cv::glob(pointCloudFile, pointCloudFilenames);
-	std::sort(pointCloudFilenames.begin(), pointCloudFilenames.end(), naturalSorting);
+	cv::Mat depth_1 = cv::imread(pathDepth_1, cv::IMREAD_ANYDEPTH | cv::IMREAD_ANYCOLOR);
+	cv::Mat depth_5 = cv::imread(pathDepth_5, cv::IMREAD_ANYDEPTH | cv::IMREAD_ANYCOLOR);
 
-	std::size_t index = 0;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1 = createPointCloud(depth_1, intrinsic_n1);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_5 = createPointCloud(depth_5, intrinsic_n5);
 
-	pcl::PointCloud<pcl::PointXYZ>::Ptr outPointCloud(new pcl::PointCloud<pcl::PointXYZ>());
-
-	Eigen::Matrix4f NP1_to_NP5;
-	NP1_to_NP5 << 0.99875184, 0.04598368, -0.0195003, -0.02709601,
+	Eigen::Matrix4f NP1_NP5;
+	NP1_NP5 << 0.99875184, 0.04598368, -0.0195003, -0.02709601,
 		0.02167112, -0.04719246, 0.99865071, -0.83099701,
 		0.04500137, -0.99782683, -0.04813008, 0.71722502,
-		0, 0, 0, 1;
+		0., 0., 0., 1.;
 
-	Eigen::Matrix4f NP2_to_NP5;
-	NP2_to_NP5 << 0.9985719, 0.00921411, -0.05262385, 0.01507933,
-		0.04437823, 0.40535598, 0.9130811, -0.77583786,
-		0.02974462, -0.91411248, 0.40436819, 0.38050523,
-		0, 0, 0, 1;
+	Eigen::Matrix4f N1_NP5;
+	N1_NP5 << 0.99889519, -0.04588697, -0.01013818, -0.02475486,
+		0.01385252, 0.08136559, 0.99658805, -0.86453359,
+		-0.0449055, -0.99562745, 0.08191135, 0.62353965,
+		0., 0., 0., 1.;
+	Eigen::Matrix4f NP5_NP5 = Eigen::Matrix4f::Identity();
+	Eigen::Matrix4f N5_NP5;
+	N5_NP5 << 9.99918519e-01, -1.36529349e-04, 1.27646766e-02, -6.19782580e-02,
+		-1.25058717e-04, 9.99790049e-01, 2.04900774e-02, 6.52560720e-02,
+		-1.27647941e-02, -2.04900042e-02, 9.99708567e-01, 2.09527401e-02,
+		0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00;
 
-	Eigen::Matrix4f NP3_to_NP5;
-	NP3_to_NP5 << 0.99896093, -0.00136228, -0.04555447, -0.01276135,
-		0.03174108, 0.73807073, 0.67397634, -0.56863481,
-		0.03270428, -0.67472197, 0.73734706, 0.12832145,
-		0, 0, 0, 1;
-
-	Eigen::Matrix4f NP4_to_NP5;
-	NP4_to_NP5 << 0.99905032, -0.01838068, -0.03950454, 0.00301888,
-		0.03303548, 0.91071428, 0.41171368, -0.27772411,
-		0.02840977, -0.41262774, 0.91045661, 0.03794943,
-		0, 0, 0, 1;
-
-	Eigen::Matrix4f NP5_to_NP5 = Eigen::Matrix4f::Identity();
-	/*NP5_to_NP5 << -0.10236438, -0.99210449, -0.07245836, 0.02107357,
+	Eigen::Matrix4f H_table_NP5;
+	H_table_NP5 << -0.10236438, -0.99210449, -0.07245836, 0.02107357,
 		-0.99472137, 0.10156727, 0.01461105, 0.03693756,
 		-0.00713629, 0.07357153, -0.99726441, 0.97146488,
-		0, 0, 0, 1;*/
+		0., 0., 0., 1.;
 
+	float rotVec_f[3] = {1.12134991642377, 1.38173224253792, -1.33534397738671};
+	float transVec_f[3] = {-0.0883353573265292, 0.135121681499141, 0.640126680231481};
+	float ide_vec[4] = { 0,0,0,1 };
 
-	/*std::cout << "mergePointClouds:: Processing" << std::endl;
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_1(new pcl::PointCloud<pcl::PointXYZ>());
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_2(new pcl::PointCloud<pcl::PointXYZ>());
-	pcl::PointCloud<pcl::PointXYZ>::Ptr trans_cloud_1(new pcl::PointCloud<pcl::PointXYZ>());
-	pcl::PointCloud<pcl::PointXYZ>::Ptr trans_cloud_5(new pcl::PointCloud<pcl::PointXYZ>());
+	float cam_vec[9] = {
+		571.15928878,0,311.07448762,
+		0, 571.16352329, 233.73421022,
+		0,0,1 };
+	cv::Mat camMat(3, 3, CV_32F, cam_vec);
 
-	pcl::io::loadPLYFile(test_pc_1, *cloud_1);
-	pcl::io::loadPLYFile(test_pc_5, *cloud_2);
-	pcl::transformPointCloud(*cloud_1, *trans_cloud_1, NP1_to_NP5);
-	pcl::io::savePLYFile(outputFolder + "/test_coor.ply", *trans_cloud_1 + *cloud_2);*/
+	cv::Mat rotVec = cv::Mat(1, 3, CV_32F, rotVec_f);
+	cv::Mat transVec = cv::Mat(3, 1, CV_32F, transVec_f);
+	cv::Mat identity = cv::Mat(1, 4, CV_32F, ide_vec);
 
-	for (auto const& f : pointCloudFilenames)
-	{
+	cv::Mat rotMat(3, 3, CV_64F), rotTransMat(3, 4, CV_64F); 
+	cv::Mat transformMatrix_rv(4, 4, CV_64F);
+	cv::Rodrigues(rotVec, rotMat);
+	cv::hconcat(rotMat, transVec, rotTransMat);
+	cv::Mat transMat_rv = camMat * rotTransMat;
+	cv::vconcat(transMat_rv, identity, transformMatrix_rv);
 
-		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
-		pcl::io::loadPLYFile(pointCloudFilenames[index], *cloud);
+	Eigen::Matrix4f test_trans_mat;
+	test_trans_mat << transformMatrix_rv.at<float>(0, 0), transformMatrix_rv.at<float>(0, 1), transformMatrix_rv.at<float>(0, 2), transformMatrix_rv.at<float>(0, 3),
+		transformMatrix_rv.at<float>(1, 0), transformMatrix_rv.at<float>(1, 1), transformMatrix_rv.at<float>(1, 2), transformMatrix_rv.at<float>(1, 3),
+		transformMatrix_rv.at<float>(2, 0), transformMatrix_rv.at<float>(2, 1), transformMatrix_rv.at<float>(2, 2), transformMatrix_rv.at<float>(2, 3),
+		transformMatrix_rv.at<float>(3, 0), transformMatrix_rv.at<float>(3, 1), transformMatrix_rv.at<float>(3, 2), transformMatrix_rv.at<float>(3, 3);
+	
+	std::cout << test_trans_mat << std::endl;
+	
 
-		if (checkSubString(pointCloudFilenames[index], "NP1"))
-		{
-			pcl::transformPointCloud(*cloud, *cloud, NP1_to_NP5);
+	pcl::transformPointCloud(*cloud_1, *cloud_1, NP1_NP5);
+	pcl::transformPointCloud(*cloud_1, *cloud_1, test_trans_mat);
+	pcl::transformPointCloud(*cloud_5, *cloud_5, NP5_NP5);
+	/*pcl::transformPointCloud(*cloud_1, *cloud_1, H_table_NP5);
+	pcl::transformPointCloud(*cloud_5, *cloud_5, H_table_NP5);*/
 
-			Eigen::MatrixXd outPoints;
-			const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(cloud);
-			Eigen::MatrixXd targetVertical = cloudMatrix;
-			Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
-			Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
-			Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
+	pcl::io::savePLYFile(outputFolder + "/np15.ply", *cloud_1);
 
-			int heightOutpoints = cloud->height;
-			int widthtOutpoints = cloud->width;
-			*outPointCloud += convertEigenMatrixXdToPCLCloud(outPoints, heightOutpoints, widthtOutpoints);
-			std::cout << "mergePointClouds:: Processing: " << pointCloudFilenames[index] << std::endl;
+	std::cout << "mergePointClouds:: Finalizing" << std::endl;
 
-		}
-
-		else if (checkSubString(pointCloudFilenames[index], "NP2"))
-		{
-			pcl::transformPointCloud(*cloud, *cloud, NP2_to_NP5);
-
-			Eigen::MatrixXd outPoints;
-			const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(cloud);
-			Eigen::MatrixXd targetVertical = cloudMatrix;
-			Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
-			Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
-			Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
-
-			int heightOutpoints = cloud->height;
-			int widthtOutpoints = cloud->width;
-			*outPointCloud += convertEigenMatrixXdToPCLCloud(outPoints, heightOutpoints, widthtOutpoints);
-			std::cout << "mergePointClouds:: Processing: " << pointCloudFilenames[index] << std::endl;
-
-		}
-
-		else if (checkSubString(pointCloudFilenames[index], "NP3"))
-		{
-			pcl::transformPointCloud(*cloud, *cloud, NP3_to_NP5);
-
-			Eigen::MatrixXd outPoints;
-			const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(cloud);
-			Eigen::MatrixXd targetVertical = cloudMatrix;
-			Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
-			Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
-			Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
-
-			int heightOutpoints = cloud->height;
-			int widthtOutpoints = cloud->width;
-			*outPointCloud += convertEigenMatrixXdToPCLCloud(outPoints, heightOutpoints, widthtOutpoints);
-			std::cout << "mergePointClouds:: Processing: " << pointCloudFilenames[index] << std::endl;
-
-		}
-
-		else if (checkSubString(pointCloudFilenames[index], "NP4"))
-		{
-			pcl::transformPointCloud(*cloud, *cloud, NP4_to_NP5);
-
-			Eigen::MatrixXd outPoints;
-			const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(cloud);
-			Eigen::MatrixXd targetVertical = cloudMatrix;
-			Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
-			Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
-			Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
-
-			int heightOutpoints = cloud->height;
-			int widthtOutpoints = cloud->width;
-			*outPointCloud += convertEigenMatrixXdToPCLCloud(outPoints, heightOutpoints, widthtOutpoints);
-			std::cout << "mergePointClouds:: Processing: " << pointCloudFilenames[index] << std::endl;
-
-		}
-
-		else if (checkSubString(pointCloudFilenames[index], "NP5"))
-		{
-			pcl::transformPointCloud(*cloud, *cloud, NP5_to_NP5);
-
-			Eigen::MatrixXd outPoints;
-			const Eigen::MatrixXd cloudMatrix = convertPCLCloudToEigenMatrixXd(cloud);
-			Eigen::MatrixXd targetVertical = cloudMatrix;
-			Eigen::Vector3d fromPoints = cloudMatrix.colwise().mean();
-			Eigen::Vector3d toPoints(0.0, 0.0, 0.0);
-			Eigen::Matrix4f transformMat = transformVerticesFromPointToPoint(targetVertical, fromPoints, toPoints, outPoints);
-
-			int heightOutpoints = cloud->height;
-			int widthtOutpoints = cloud->width;
-			*outPointCloud += convertEigenMatrixXdToPCLCloud(outPoints, heightOutpoints, widthtOutpoints);
-			std::cout << "mergePointClouds:: Processing: " << pointCloudFilenames[index] << std::endl;
-
-		}
-		index++;
-	}
-	pcl::io::savePLYFile(outputFolder + "/test_transform_to_root.ply", *outPointCloud);
 }
 
 
